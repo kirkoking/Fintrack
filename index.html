@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fintrack · Importar</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root[data-theme="dark"]{
+  --bg:#0e0f11;--surface:#16181c;--surface2:#1e2126;--surface3:#252830;
+  --border:#2a2d35;--border2:#383d48;
+  --text:#f0ede8;--text2:#a8aab8;--text3:#5a5e6e;
+  --accent:#c8f060;--accent-dim:rgba(200,240,96,0.1);
+  --accent2:#60c8f0;--danger:#f06060;--warning:#f0b060;--success:#60f0a8;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+:root[data-theme="light"]{
+  --bg:#f5f4f0;--surface:#fff;--surface2:#f0eeea;--surface3:#e8e6e1;
+  --border:#dddbd5;--border2:#ccc9c2;
+  --text:#1a1a1a;--text2:#5a5a5a;--text3:#9a9a9a;
+  --accent:#4a7a00;--accent-dim:rgba(74,122,0,0.08);
+  --accent2:#0070a8;--danger:#c03030;--warning:#a07000;--success:#007a50;
+  --shadow:0 4px 24px rgba(0,0,0,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg);z-index:100;}
+.logo-title{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--accent);}
+.logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;}
+.icon-btn{background:transparent;border:1px solid var(--border);color:var(--text2);width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all 0.2s;text-decoration:none;flex-shrink:0;}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);}
+main{padding:1.5rem;max-width:860px;margin:0 auto;}
+
+/* MODE TOGGLE */
+.mode-toggle{display:flex;gap:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem;}
+.mode-btn{flex:1;padding:9px 16px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;border:none;color:var(--text3);transition:all 0.2s;text-align:center;}
+.mode-btn.active{background:var(--surface);color:var(--text);border-radius:9px;}
+
+/* STEPS */
+.steps{display:flex;gap:0;margin-bottom:1.5rem;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);padding-bottom:1rem;}
+.steps::-webkit-scrollbar{display:none;}
+.step{display:flex;align-items:center;gap:6px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;cursor:default;}
+.step-num{width:18px;height:18px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;}
+.step.active{color:var(--accent);}
+.step.active .step-num{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.step.done .step-num{background:var(--surface2);}
+.step-arr{color:var(--border2);font-size:10px;}
+
+/* PANELS */
+.panel{display:none;animation:fadeIn 0.2s ease;}
+.panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border2);border-radius:14px;padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:var(--accent-dim);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:2rem;margin-bottom:.8rem;}
+.upload-title{font-family:'DM Serif Display',serif;font-size:1.2rem;margin-bottom:4px;}
+.upload-sub{font-size:12px;color:var(--text3);}
+.fmt-pills{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-top:.8rem;}
+.fmt{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border:1px solid var(--border2);border-radius:3px;color:var(--text3);}
+
+/* FILE QUEUE */
+.file-queue{display:flex;flex-direction:column;gap:8px;margin-top:1rem;}
+.file-item{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.file-item-header{display:flex;align-items:center;gap:10px;padding:.8rem 1rem;}
+.file-icon-sm{font-size:1.4rem;flex-shrink:0;}
+.file-meta{flex:1;min-width:0;}
+.file-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.file-size{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
+.file-status{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:3px;}
+.file-status.pending{background:var(--surface2);color:var(--text3);}
+.file-status.processing{background:rgba(96,200,240,0.1);color:var(--accent2);}
+.file-status.done{background:rgba(96,240,168,0.1);color:var(--success);}
+.file-status.error{background:rgba(240,96,96,0.1);color:var(--danger);}
+.file-remove{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;transition:color 0.2s;flex-shrink:0;}
+.file-remove:hover{color:var(--danger);}
+.file-note-wrap{border-top:1px solid var(--border);padding:.7rem 1rem;}
+.file-note-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.file-note-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;outline:none;resize:vertical;min-height:60px;}
+.file-note-input:focus{border-color:var(--accent);}
+.file-note-input::placeholder{color:var(--text3);}
+.file-preview-btn{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent2);background:transparent;border:none;cursor:pointer;padding:0;text-decoration:underline;}
+.file-preview-wrap{border-top:1px solid var(--border);padding:.5rem;max-height:300px;overflow:hidden;border-radius:0 0 10px 10px;background:var(--surface2);}
+.file-preview-wrap img{width:100%;height:auto;max-height:280px;object-fit:contain;border-radius:6px;}
+.file-preview-wrap iframe{width:100%;height:280px;border:none;border-radius:6px;}
+
+/* ACCOUNT SELECT */
+.account-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;margin:.8rem 0;}
+.acc-card{background:var(--surface);border:2px solid var(--border);border-radius:9px;padding:.7rem .9rem;cursor:pointer;transition:all 0.2s;}
+.acc-card:hover{border-color:var(--border2);}
+.acc-card.selected{border-color:var(--accent);background:var(--accent-dim);}
+.acc-bank{font-size:11px;font-weight:600;}
+.acc-name{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
+.acc-curr{font-family:'DM Mono',monospace;font-size:8px;padding:1px 4px;border-radius:2px;background:var(--surface2);color:var(--text3);}
+
+/* SINGLE FLOW NOTE */
+.note-field{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;}
+.note-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
+.note-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:80px;}
+.note-textarea:focus{border-color:var(--accent);}
+.note-textarea::placeholder{color:var(--text3);}
+.note-examples{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.note-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 9px;font-size:11px;color:var(--text3);cursor:pointer;transition:all 0.15s;}
+.note-chip:hover{border-color:var(--accent);color:var(--accent);}
+
+/* PROCESSING */
+.proc-wrap{text-align:center;padding:2rem 1rem;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1.2rem;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-title{font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:6px;}
+.proc-sub{font-size:11px;color:var(--text3);}
+.log-box{background:var(--surface2);border-radius:8px;padding:.9rem;font-family:'DM Mono',monospace;font-size:10px;line-height:1.9;text-align:left;margin-top:1.2rem;max-height:200px;overflow-y:auto;}
+.log-line{color:var(--text3);}
+.log-ok{color:var(--success);}
+.log-err{color:var(--danger);}
+.log-info{color:var(--accent2);}
+
+/* BULK PROGRESS */
+.bulk-progress{display:flex;flex-direction:column;gap:6px;margin-top:1rem;}
+.bulk-file-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;}
+.bulk-file-name{flex:1;font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bulk-bar-wrap{width:80px;flex-shrink:0;}
+.bulk-bar-bg{height:4px;background:var(--surface2);border-radius:2px;}
+.bulk-bar-fill{height:100%;border-radius:2px;background:var(--accent);transition:width 0.4s;}
+.bulk-count{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;min-width:50px;text-align:right;}
+
+/* PREVIEW TABLE */
+.preview-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem;flex-wrap:wrap;gap:6px;}
+.preview-stats{display:flex;gap:10px;}
+.p-stat{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.p-stat span{color:var(--text);}
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;margin-bottom:1rem;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead th{background:var(--surface2);padding:7px 9px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);white-space:nowrap;}
+tbody tr{border-top:1px solid var(--border);transition:background 0.1s;}
+tbody tr:hover{background:var(--surface2);}
+tbody tr.excluded{opacity:0.3;}
+tbody td{padding:6px 9px;vertical-align:middle;}
+.td-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);white-space:nowrap;}
+.td-desc{max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.td-amt{font-family:'DM Mono',monospace;white-space:nowrap;font-size:11px;}
+.td-amt.neg{color:var(--danger);}
+.td-amt.pos{color:var(--success);}
+.cat-sel{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 4px;color:var(--text);font-family:'DM Mono',monospace;font-size:9px;outline:none;cursor:pointer;max-width:110px;}
+.cat-sel:focus{border-color:var(--accent);}
+.row-tog{background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--text3);transition:color 0.2s;padding:1px 3px;}
+.row-tog:hover{color:var(--danger);}
+
+/* DRIVE STATUS */
+.drive-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;display:flex;align-items:center;gap:9px;font-size:12px;margin-bottom:1rem;}
+.d-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;}
+.d-dot.on{background:var(--success);}
+.d-dot.pending{background:var(--warning);animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.d-text{flex:1;color:var(--text2);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;border:1px solid transparent;text-decoration:none;}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#0e0f11;}
+.btn-primary:hover:not(:disabled){filter:brightness(0.92);}
+.btn-secondary{background:transparent;border-color:var(--border);color:var(--text2);}
+.btn-secondary:hover{border-color:var(--border2);color:var(--text);}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-row{display:flex;gap:7px;flex-wrap:wrap;}
+
+/* SUCCESS */
+.success-wrap{text-align:center;padding:2rem 1rem;}
+.success-icon{font-size:2.5rem;margin-bottom:.8rem;}
+.success-title{font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:6px;}
+.success-sub{font-size:13px;color:var(--text2);margin-bottom:1.2rem;}
+.success-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin-bottom:1.2rem;}
+.s-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:.7rem;}
+.s-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;margin-bottom:3px;}
+.s-val{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--accent);}
+.drive-link{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;font-size:12px;color:var(--text2);text-decoration:none;transition:all 0.2s;margin-bottom:1.2rem;}
+.drive-link:hover{border-color:var(--accent);color:var(--accent);}
+
+.section-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:.7rem;}
+.divider{border:none;border-top:1px solid var(--border);margin:1.2rem 0;}
+
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--surface);border:1px solid var(--accent);border-radius:8px;padding:.6rem .9rem;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);z-index:999;transform:translateY(100px);opacity:0;transition:all 0.3s;box-shadow:var(--shadow);max-width:260px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.err{border-color:var(--danger);color:var(--danger);}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo-title">Fintrack · Importar</div>
+    <div class="logo-sub">Estado de cuenta → Supabase</div>
+  </div>
+  <div style="display:flex;gap:7px">
+    <a href="fintrack.html" class="icon-btn" title="Dashboard">←</a>
+    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">☀</button>
+  </div>
+</header>
+
+<main>
+
+<!-- MODE SELECT -->
+<div class="mode-toggle">
+  <button class="mode-btn active" id="mode-single-btn" onclick="setMode('single')">📄 Un archivo</button>
+  <button class="mode-btn" id="mode-bulk-btn" onclick="setMode('bulk')">📦 Carga masiva</button>
+</div>
+
+<!-- STEPS -->
+<div class="steps" id="steps-wrap"></div>
+
+<!-- ════════ SINGLE FLOW ════════ -->
+<div id="single-flow">
+
+  <!-- S1: UPLOAD -->
+  <div class="panel active" id="s-panel-1">
+    <div class="section-title">Selecciona el archivo</div>
+    <div class="upload-zone" id="s-upload-zone">
+      <input type="file" id="s-file-input" accept=".pdf,.xls,.xlsx,.jpg,.jpeg,.png,.heic,.heif" onchange="sSingleFile(this.files[0])">
+      <div class="upload-icon">📄</div>
+      <div class="upload-title">Arrastra o selecciona</div>
+      <div class="upload-sub">PDF, XLS, XLSX, JPG, PNG, HEIC</div>
+      <div class="fmt-pills"><span class="fmt">PDF</span><span class="fmt">XLS</span><span class="fmt">XLSX</span><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">HEIC</span></div>
+    </div>
+    <div id="s-file-preview" style="display:none;margin-top:.8rem"></div>
+
+    <div class="divider"></div>
+
+    <div class="section-title">Nota del documento <span style="color:var(--text3);font-size:9px;font-weight:400">(opcional)</span></div>
+    <div class="note-field">
+      <textarea class="note-textarea" id="s-doc-note" placeholder="Ej: La mitad de esto la debe pagar Felipe. / Estos gastos son del viaje de trabajo, debo rendirlos. / Compré el computador en cuotas..."></textarea>
+      <div class="note-examples">
+        <span class="note-chip" onclick="appendNote('s-doc-note','Debo rendir estos gastos')">📋 Debo rendir</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','La mitad la paga un tercero')">👥 Pago compartido</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','Me lo reembolsa mi empresa')">💼 Reembolso empresa</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','Compra en cuotas')">💳 En cuotas</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','Me lo paga un familiar')">👨‍👩‍👦 Paga familiar</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div id="s-drive-section"></div>
+
+    <div style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="sGoStep(2)" id="s-btn-1" disabled>Continuar →</button>
+    </div>
+  </div>
+
+  <!-- S2: ACCOUNT -->
+  <div class="panel" id="s-panel-2">
+    <div class="section-title">¿A qué cuenta pertenece?</div>
+    <div class="account-grid" id="s-acc-grid"></div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-secondary" onclick="sGoPanel(1)">← Volver</button>
+      <button class="btn btn-primary" onclick="sProcess()" id="s-btn-2" disabled>Procesar con Claude →</button>
+    </div>
+  </div>
+
+  <!-- S3: PROCESSING -->
+  <div class="panel" id="s-panel-3">
+    <div class="proc-wrap">
+      <div class="spinner" id="s-spinner"></div>
+      <div class="proc-title" id="s-proc-title">Procesando...</div>
+      <div class="proc-sub" id="s-proc-sub">Claude está leyendo el documento</div>
+      <div class="log-box" id="s-log"></div>
+    </div>
+  </div>
+
+  <!-- S4: PREVIEW -->
+  <div class="panel" id="s-panel-4">
+    <div class="preview-header">
+      <div>
+        <div class="section-title">Revisa antes de importar</div>
+        <div class="preview-stats" id="s-preview-stats"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="sSelectAll(true)">Todo</button>
+        <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="sSelectAll(false)">Ninguno</button>
+      </div>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th style="width:28px"></th><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Categoría</th></tr></thead><tbody id="s-tbody"></tbody></table></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="sGoPanel(2)">← Volver</button>
+      <button class="btn btn-primary" onclick="sConfirm()" id="s-btn-confirm">Importar a Supabase →</button>
+    </div>
+  </div>
+
+  <!-- S5: SUCCESS -->
+  <div class="panel" id="s-panel-5">
+    <div class="success-wrap">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">¡Importado!</div>
+      <div class="success-sub" id="s-success-sub"></div>
+      <div class="success-grid" id="s-success-grid"></div>
+      <a id="s-drive-link" href="#" target="_blank" class="drive-link" style="display:none">📁 Ver en Google Drive</a>
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn btn-secondary" onclick="resetSingle()">Importar otro</button>
+        <a href="fintrack.html" class="btn btn-primary">Ver Dashboard →</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /single-flow -->
+
+<!-- ════════ BULK FLOW ════════ -->
+<div id="bulk-flow" style="display:none">
+
+  <!-- B1: FILES + NOTES -->
+  <div class="panel active" id="b-panel-1">
+    <div class="section-title">Agrega los archivos</div>
+    <div class="upload-zone" id="b-upload-zone">
+      <input type="file" id="b-file-input" accept=".pdf,.xls,.xlsx,.jpg,.jpeg,.png,.heic,.heif" multiple onchange="bAddFiles(this.files)">
+      <div class="upload-icon">📦</div>
+      <div class="upload-title">Arrastra múltiples archivos</div>
+      <div class="upload-sub">Puedes agregar de a poco — se acumulan</div>
+      <div class="fmt-pills"><span class="fmt">PDF</span><span class="fmt">XLS</span><span class="fmt">XLSX</span><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">HEIC</span></div>
+    </div>
+    <div class="file-queue" id="b-file-queue"></div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="bGoStep(2)" id="b-btn-1" disabled>Continuar →</button>
+    </div>
+  </div>
+
+  <!-- B2: ACCOUNTS PER FILE -->
+  <div class="panel" id="b-panel-2">
+    <div class="section-title">Asigna cada archivo a una cuenta</div>
+    <div id="b-assign-list"></div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-secondary" onclick="bGoPanel(1)">← Volver</button>
+      <button class="btn btn-primary" onclick="bProcess()" id="b-btn-2" disabled>Procesar todos con Claude →</button>
+    </div>
+  </div>
+
+  <!-- B3: PROCESSING ALL -->
+  <div class="panel" id="b-panel-3">
+    <div class="proc-wrap" style="padding:1.5rem 1rem">
+      <div class="spinner" id="b-spinner"></div>
+      <div class="proc-title" id="b-proc-title">Procesando archivos...</div>
+      <div class="proc-sub" id="b-proc-sub">Claude está leyendo uno por uno</div>
+    </div>
+    <div class="bulk-progress" id="b-progress-list"></div>
+  </div>
+
+  <!-- B4: PREVIEW ALL -->
+  <div class="panel" id="b-panel-4">
+    <div id="b-preview-accordion"></div>
+    <div class="btn-row" style="margin-top:1rem">
+      <button class="btn btn-secondary" onclick="bGoPanel(2)">← Volver</button>
+      <button class="btn btn-primary" onclick="bConfirmAll()" id="b-btn-confirm">Importar todo →</button>
+    </div>
+  </div>
+
+  <!-- B5: SUCCESS -->
+  <div class="panel" id="b-panel-5">
+    <div class="success-wrap">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">¡Carga masiva completa!</div>
+      <div class="success-sub" id="b-success-sub"></div>
+      <div class="success-grid" id="b-success-grid"></div>
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn btn-secondary" onclick="resetBulk()">Nueva carga</button>
+        <a href="fintrack.html" class="btn btn-primary">Ver Dashboard →</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /bulk-flow -->
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://japiqczoxgxnygwakmcm.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcGlxY3pveGd4bnlnd2FrbWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4Mzc5MDYsImV4cCI6MjA5MDQxMzkwNn0.qqtlYy-4mzjNghaCDJXAK0QU9mW5DBmtfHN8wQfjn2U';
+const SB_H = {'apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY,'Content-Type':'application/json'};
+
+const ACCOUNTS = [
+  {id:'0e1f70bf-013a-416d-b6fb-bc55ed30b9f1',bank:'Itaú',name:'TC Nacional',currency:'CLP'},
+  {id:'f5b382e4-4625-4b70-a890-ca44ace192fd',bank:'Scotiabank',name:'TC Nacional',currency:'CLP'},
+  {id:'9636953b-d4cb-4a4a-b193-76796cc9c51d',bank:'Banco de Chile',name:'TC Nacional',currency:'CLP'},
+  {id:'96d3b64c-f35c-4ae1-8460-5dadf1d009e5',bank:'Banco de Chile',name:'TC Internacional',currency:'USD'},
+  {id:'f30ac63e-b0e2-4b5f-ad62-fd7a7671ff0b',bank:'Tenpo',name:'TC Digital',currency:'CLP'},
+  {id:'b3428f73-ae68-48ce-820c-3dcae69d9873',bank:'CMR Falabella',name:'TC CMR',currency:'CLP'},
+];
+const CATS = {food:'Comida',transport:'Transporte',shopping:'Compras',health:'Salud',entertainment:'Entretención',fitness:'Fitness',personal_care:'Cuidado personal',utilities:'Servicios',housing:'Vivienda',fees:'Comisiones',loan_payment:'Cuota préstamo',payment:'Pago tarjeta',other:'Otro',travel:'Viajes',donations:'Donaciones',subscriptions:'Suscripciones',pets:'Mascotas',education:'Educación'};
+const CAT_OPTS = Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+const ACC_OPTS = ACCOUNTS.map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('');
+
+let mode = 'single', driveToken = null;
+// Single state
+let sFile = null, sAccount = null, sTxs = [], sMeta = {};
+// Bulk state
+let bFiles = []; // [{file, note, account, txs, meta, status}]
+
+// ── THEME ──
+function toggleTheme(){
+  const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('theme-btn').textContent = t==='dark'?'☀':'🌙';
+}
+
+// ── TOAST ──
+function toast(msg,err){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast show'+(err?' err':'');
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── NOTE CHIPS ──
+function appendNote(id, text){
+  const el=document.getElementById(id);
+  if(el) el.value = (el.value ? el.value+' — '+text : text);
+}
+
+// ── MODE ──
+function setMode(m){
+  mode=m;
+  document.getElementById('single-flow').style.display = m==='single'?'block':'none';
+  document.getElementById('bulk-flow').style.display = m==='bulk'?'block':'none';
+  document.getElementById('mode-single-btn').classList.toggle('active',m==='single');
+  document.getElementById('mode-bulk-btn').classList.toggle('active',m==='bulk');
+  renderSteps();
+}
+
+// ── STEPS ──
+const SINGLE_STEPS = ['Archivo','Cuenta','Procesando','Revisar','Listo'];
+const BULK_STEPS = ['Archivos','Cuentas','Procesando','Revisar','Listo'];
+let currentStep = 1;
+function renderSteps(step){
+  if(step) currentStep=step;
+  const labels = mode==='single'?SINGLE_STEPS:BULK_STEPS;
+  document.getElementById('steps-wrap').innerHTML = labels.map((l,i)=>{
+    const n=i+1, cls = n===currentStep?'active':n<currentStep?'done':'';
+    return `<div class="step ${cls}"><div class="step-num">${n<currentStep?'✓':n}</div>${l}</div>${i<labels.length-1?'<div class="step-arr">›</div>':''}`;
+  }).join('');
+}
+
+// ── DRIVE ──
+function renderDriveStatus(containerId){
+  const clientId = localStorage.getItem('goog_client_id');
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = `
+    <div class="section-title">Google Drive <span style="color:var(--text3);font-size:9px">(backup opcional)</span></div>
+    <div class="drive-box">
+      <div class="d-dot ${driveToken?'on':clientId?'pending':''}" id="d-dot-${containerId}"></div>
+      <div class="d-text" id="d-text-${containerId}">${
+        driveToken ? 'Drive conectado ✓ — backup automático activado' :
+        clientId ? 'Client ID guardado — haz click en Conectar' :
+        'Sin configurar — el archivo no se subirá a Drive'
+      }</div>
+      ${driveToken ? 
+        `<button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="disconnectDrive()">Desconectar</button>` :
+        `<button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="showDriveSetup('${containerId}')">${clientId?'Conectar':'Configurar'}</button>`
+      }
+    </div>
+    <div id="drive-setup-${containerId}" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.9rem;font-size:12px;margin-bottom:.8rem">
+      <p style="color:var(--text2);margin-bottom:7px">Ingresa tu Google OAuth Client ID:</p>
+      <input type="text" id="client-id-${containerId}" placeholder="xxxxxxxx.apps.googleusercontent.com" value="${clientId||''}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;margin-bottom:7px;">
+      <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="saveDriveId('${containerId}')">Guardar y conectar</button>
+      <p style="margin-top:7px;font-size:10px;color:var(--text3)">¿No tienes Client ID? Pregúntale a Claude — se configura en 5 min y funciona desde el teléfono también.</p>
+    </div>`;
+}
+function showDriveSetup(cid){
+  const el=document.getElementById('drive-setup-'+cid);
+  if(el) el.style.display = el.style.display==='none'?'block':'none';
+}
+function saveDriveId(cid){
+  const val=document.getElementById('client-id-'+cid).value.trim();
+  if(!val) return;
+  localStorage.setItem('goog_client_id',val);
+  document.getElementById('drive-setup-'+cid).style.display='none';
+  connectDrive(cid);
+}
+function connectDrive(cid){
+  const clientId=localStorage.getItem('goog_client_id');
+  if(!clientId) return;
+  const dot=document.getElementById('d-dot-'+cid);
+  const txt=document.getElementById('d-text-'+cid);
+  if(dot) dot.className='d-dot pending';
+  if(txt) txt.textContent='Conectando...';
+  if(!window.google){
+    const s=document.createElement('script');
+    s.src='https://accounts.google.com/gsi/client';
+    s.onload=()=>_driveAuth(clientId,cid);
+    document.head.appendChild(s);
+  } else { _driveAuth(clientId,cid); }
+}
+function _driveAuth(clientId,cid){
+  try {
+    google.accounts.oauth2.initTokenClient({
+      client_id:clientId,
+      scope:'https://www.googleapis.com/auth/drive.file',
+      callback:(r)=>{
+        if(r.error){ toast('Error Drive: '+r.error,true); return; }
+        driveToken=r.access_token;
+        const dot=document.getElementById('d-dot-'+cid);
+        const txt=document.getElementById('d-text-'+cid);
+        if(dot) dot.className='d-dot on';
+        if(txt) txt.textContent='Google Drive conectado ✓';
+        toast('Drive conectado ✓');
+      }
+    }).requestAccessToken({prompt:''});
+  } catch(e){ toast('Error iniciando Drive',true); }
+}
+function disconnectDrive(){ driveToken=null; renderDriveStatus('s-drive-section'); }
+
+async function uploadToDrive(file, filename){
+  if(!driveToken) return null;
+  try {
+    const fRes=await fetch("https://www.googleapis.com/drive/v3/files?q=name='Fintrack CL' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)",{headers:{'Authorization':'Bearer '+driveToken}});
+    const fData=await fRes.json();
+    let folderId;
+    if(fData.files?.length>0){ folderId=fData.files[0].id; }
+    else {
+      const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({name:'Fintrack CL',mimeType:'application/vnd.google-apps.folder'})});
+      folderId=(await cr.json()).id;
+    }
+    const meta=JSON.stringify({name:filename,parents:[folderId]});
+    const form=new FormData();
+    form.append('metadata',new Blob([meta],{type:'application/json'}));
+    form.append('file',file);
+    const upRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+driveToken},body:form});
+    const up=await upRes.json();
+    return up.id ? {fileId:up.id,url:up.webViewLink} : null;
+  } catch(e){ console.error('Drive upload failed:',e); return null; }
+}
+
+// ── HELPERS ──
+async function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const ext=file.name.split('.').pop().toLowerCase();
+    let mt=file.type||'application/octet-stream';
+    if(ext==='heic'||ext==='heif') mt='image/heic';
+    if(ext==='xls') mt='application/vnd.ms-excel';
+    if(ext==='xlsx') mt='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const r=new FileReader();
+    r.onload=e=>res({base64:e.target.result.split(',')[1],mediaType:mt});
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+async function callClaude(base64,mediaType,filename,account){
+  const isImg=mediaType.startsWith('image/');
+  const isPdf=mediaType==='application/pdf';
+  const content=[];
+  const hint=`Estado de cuenta de ${account.bank} (${account.name}, ${account.currency}). Extrae TODAS las transacciones del período actual.`;
+  if(isImg){ content.push({type:'image',source:{type:'base64',media_type:mediaType,data:base64}}); content.push({type:'text',text:hint}); }
+  else if(isPdf){ content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}}); content.push({type:'text',text:hint}); }
+  else { content.push({type:'text',text:`Archivo: ${filename}. ${hint}. Datos: ${base64.slice(0,300)}...`}); }
+
+  const sys=`Eres un parser experto de estados de cuenta bancarios chilenos. Extrae TODAS las transacciones y devuelve SOLO JSON válido sin texto adicional:
+{"bank_detected":"string","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","transactions":[{"date":"YYYY-MM-DD","description_raw":"string","description_clean":"string sin sufijos","amount":-15000,"currency":"CLP","category_slug":"food"}]}
+Reglas: amount NEGATIVO=gasto, POSITIVO=pago/abono. USD en centavos (7.23→723). category_slug: food,transport,shopping,health,entertainment,fitness,personal_care,utilities,housing,fees,loan_payment,payment,other,travel,donations,subscriptions,pets,education. No incluyas totales ni subtotales.`;
+
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8000,system:sys,messages:[{role:'user',content}]})});
+  if(!r.ok) throw new Error('Claude API '+r.status);
+  const d=await r.json();
+  const txt=d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+  return JSON.parse(txt.replace(/```json|```/g,'').trim());
+}
+async function makeHash(date,desc,amount,accountId){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${date}|${desc}|${amount}|${accountId}`));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32);
+}
+async function insertToSupabase(txs,importMeta){
+  const impRes=await fetch(`${SUPABASE_URL}/rest/v1/imports`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({
+    account_id:importMeta.account_id,
+    source_file:importMeta.original_filename,
+    source_type:importMeta.source_type,
+    period_start:importMeta.period_start||null,
+    period_end:importMeta.period_end||null,
+    row_count:txs.length,
+    status:'processing',
+    bank_detected:importMeta.bank_detected,
+    original_filename:importMeta.original_filename,
+    standardized_filename:importMeta.standardized_filename,
+    drive_url:importMeta.drive_url||null,
+    drive_file_id:importMeta.drive_file_id||null,
+    user_note:importMeta.user_note||null,
+  })});
+  const impData=await impRes.json();
+  const importId=Array.isArray(impData)?impData[0]?.id:impData?.id;
+
+  const rows=await Promise.all(txs.map(async t=>({
+    date:t.date,description_raw:t.description_raw,description_clean:t.description_clean,
+    amount:t.amount,currency:t.currency,category_slug:t.category_slug,
+    account_id:importMeta.account_id,import_id:importId||null,
+    hash:await makeHash(t.date,t.description_raw,t.amount,importMeta.account_id),
+    notes:[importMeta.user_note,importMeta.drive_url?`drive:${importMeta.drive_url}`:null].filter(Boolean).join(' | ')||''
+  })));
+
+  let inserted=0,skipped=0;
+  for(let i=0;i<rows.length;i+=100){
+    const batch=rows.slice(i,i+100);
+    const r=await fetch(`${SUPABASE_URL}/rest/v1/transactions`,{method:'POST',headers:{...SB_H,'Prefer':'resolution=ignore-duplicates,return=representation'},body:JSON.stringify(batch)});
+    const res=await r.json();
+    if(Array.isArray(res)){inserted+=res.length;skipped+=batch.length-res.length;}
+    else inserted+=batch.length;
+  }
+  if(importId) await fetch(`${SUPABASE_URL}/rest/v1/imports?id=eq.${importId}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({status:'done',inserted_count:inserted,skipped_count:skipped})});
+  return {inserted,skipped,importId};
+}
+function stdName(file,account){
+  const ext=file.name.split('.').pop().toLowerCase();
+  const d=new Date().toISOString().slice(0,10);
+  return `fintrack_${account.bank.replace(/\s+/g,'_').toLowerCase()}_${account.name.replace(/\s+/g,'_').toLowerCase()}_${d}.${ext}`;
+}
+function fileIcon(f){ const e=f.name.split('.').pop().toLowerCase(); return {pdf:'📄',xls:'📊',xlsx:'📊',jpg:'🖼',jpeg:'🖼',png:'🖼',heic:'🖼',heif:'🖼'}[e]||'📎'; }
+
+// ════════════ SINGLE FLOW ════════════
+const sZone=document.getElementById('s-upload-zone');
+sZone.addEventListener('dragover',e=>{e.preventDefault();sZone.classList.add('drag');});
+sZone.addEventListener('dragleave',()=>sZone.classList.remove('drag'));
+sZone.addEventListener('drop',e=>{e.preventDefault();sZone.classList.remove('drag');if(e.dataTransfer.files[0])sSingleFile(e.dataTransfer.files[0]);});
+
+function sSingleFile(file){
+  if(!file) return;
+  sFile=file;
+  const sz=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+'MB':Math.round(file.size/1024)+'KB';
+  document.getElementById('s-file-preview').innerHTML=`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;display:flex;align-items:center;gap:9px;">
+      <span style="font-size:1.3rem">${fileIcon(file)}</span>
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">${sz}</div></div>
+      <button onclick="sRemoveFile()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:3px">✕</button>
+    </div>`;
+  document.getElementById('s-file-preview').style.display='block';
+  document.getElementById('s-upload-zone').style.display='none';
+  document.getElementById('s-btn-1').disabled=false;
+}
+function sRemoveFile(){
+  sFile=null;
+  document.getElementById('s-file-preview').style.display='none';
+  document.getElementById('s-upload-zone').style.display='block';
+  document.getElementById('s-btn-1').disabled=true;
+  document.getElementById('s-file-input').value='';
+}
+function sGoStep(n){ sGoPanel(n); renderSteps(n); }
+function sGoPanel(n){
+  document.querySelectorAll('#single-flow .panel').forEach((p,i)=>p.classList.toggle('active',i+1===n));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===2){
+    document.getElementById('s-acc-grid').innerHTML=ACCOUNTS.map(a=>`
+      <div class="acc-card" onclick="sSelectAcc('${a.id}')" id="sacc-${a.id}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="acc-bank">${a.bank}</div><div class="acc-curr">${a.currency}</div></div>
+        <div class="acc-name">${a.name}</div>
+      </div>`).join('');
+  }
+}
+function sSelectAcc(id){
+  sAccount=ACCOUNTS.find(a=>a.id===id);
+  document.querySelectorAll('#s-acc-grid .acc-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('sacc-'+id).classList.add('selected');
+  document.getElementById('s-btn-2').disabled=false;
+}
+function sLog(msg,cls){ const b=document.getElementById('s-log'); b.innerHTML+=`<div class="${cls||'log-line'}">${msg}</div>`; b.scrollTop=b.scrollHeight; }
+
+async function sProcess(){
+  sGoPanel(3); renderSteps(3);
+  sTxs=[]; sMeta={};
+  try {
+    const docNote=document.getElementById('s-doc-note').value.trim();
+    const dateStr=new Date().toISOString().slice(0,10);
+    const sName=stdName(sFile,sAccount);
+    let driveUrl=null,driveFileId=null;
+
+    if(driveToken){
+      sLog('📁 Subiendo a Google Drive...','log-info');
+      document.getElementById('s-proc-title').textContent='Guardando en Drive...';
+      const dr=await uploadToDrive(sFile,sName);
+      if(dr){ driveUrl=dr.url; driveFileId=dr.fileId; sLog('✓ Drive: '+sName,'log-ok'); }
+      else sLog('⚠ Drive falló — continuando','log-err');
+    } else { sLog('ℹ Drive no configurado','log-line'); }
+
+    sLog('📖 Leyendo archivo...','log-info');
+    document.getElementById('s-proc-title').textContent='Leyendo documento...';
+    const {base64,mediaType}=await fileToBase64(sFile);
+
+    sLog('🤖 Claude está parseando...','log-info');
+    document.getElementById('s-proc-title').textContent='Claude está leyendo...';
+    document.getElementById('s-proc-sub').textContent='Extrayendo transacciones';
+
+    const parsed=await callClaude(base64,mediaType,sFile.name,sAccount);
+    sTxs=(parsed.transactions||[]).map((t,i)=>({...t,included:true,id_temp:'t'+i}));
+    sMeta={account_id:sAccount.id,original_filename:sFile.name,standardized_filename:sName,source_type:sFile.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:docNote};
+
+    sLog(`✓ ${sTxs.length} transacciones extraídas`,'log-ok');
+    sLog(`  Banco: ${parsed.bank_detected||'?'} · ${parsed.period_start||'?'} → ${parsed.period_end||'?'}`,'log-line');
+    if(docNote) sLog(`  📝 Nota: "${docNote}"`,'log-line');
+    document.getElementById('s-spinner').style.display='none';
+    setTimeout(()=>{ sRenderPreview(); sGoPanel(4); renderSteps(4); },600);
+  } catch(e){
+    document.getElementById('s-spinner').style.display='none';
+    document.getElementById('s-proc-title').textContent='Error';
+    sLog('✕ '+e.message,'log-err');
+    console.error(e);
+  }
+}
+
+function sRenderPreview(){
+  const inc=sTxs.filter(t=>t.included);
+  const total=inc.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
+  document.getElementById('s-preview-stats').innerHTML=`<div class="p-stat"><span>${inc.length}</span> seleccionadas</div><div class="p-stat">$<span>${total.toLocaleString('es-CL')}</span> cargos</div>`;
+  document.getElementById('s-tbody').innerHTML=sTxs.map((t,i)=>`
+    <tr id="sr-${i}" class="${t.included?'':'excluded'}">
+      <td><button class="row-tog" onclick="sTogRow(${i})">${t.included?'✕':'+'}</button></td>
+      <td class="td-date">${t.date}</td>
+      <td><div class="td-desc" title="${t.description_clean||''}">${(t.description_clean||'').slice(0,38)}</div></td>
+      <td class="td-amt ${t.amount<0?'neg':'pos'}">${t.amount<0?'':'+'}$${Math.abs(t.amount).toLocaleString('es-CL')}</td>
+      <td><select class="cat-sel" onchange="sTxs[${i}].category_slug=this.value">${CAT_OPTS.replace(`value="${t.category_slug}"`,`value="${t.category_slug}" selected`)}</select></td>
+    </tr>`).join('');
+}
+function sTogRow(i){ sTxs[i].included=!sTxs[i].included; sRenderPreview(); }
+function sSelectAll(v){ sTxs.forEach(t=>t.included=v); sRenderPreview(); }
+
+async function sConfirm(){
+  const btn=document.getElementById('s-btn-confirm');
+  btn.disabled=true; btn.textContent='Importando...';
+  const toIns=sTxs.filter(t=>t.included);
+  if(!toIns.length){ toast('No hay transacciones seleccionadas',true); btn.disabled=false; btn.textContent='Importar a Supabase →'; return; }
+  try {
+    const {inserted,skipped}=await insertToSupabase(toIns,sMeta);
+    document.getElementById('s-success-sub').textContent=`${inserted} nuevas · ${skipped} duplicadas omitidas`;
+    document.getElementById('s-success-grid').innerHTML=`
+      <div class="s-card"><div class="s-label">Insertadas</div><div class="s-val">${inserted}</div></div>
+      <div class="s-card"><div class="s-label">Omitidas</div><div class="s-val">${skipped}</div></div>
+      <div class="s-card"><div class="s-label">Banco</div><div class="s-val" style="font-size:.95rem">${sAccount.bank}</div></div>`;
+    if(sMeta.drive_url){ const l=document.getElementById('s-drive-link'); l.href=sMeta.drive_url; l.style.display='inline-flex'; }
+    if(sMeta.user_note){ document.getElementById('s-success-sub').textContent+=` · 📝 "${sMeta.user_note}"`; }
+    sGoPanel(5); renderSteps(5);
+  } catch(e){ toast('Error: '+e.message,true); btn.disabled=false; btn.textContent='Importar a Supabase →'; }
+}
+function resetSingle(){ sFile=null;sAccount=null;sTxs=[];sMeta={}; document.getElementById('s-file-input').value=''; document.getElementById('s-log').innerHTML=''; document.getElementById('s-spinner').style.display='block'; sRemoveFile(); document.getElementById('s-doc-note').value=''; sGoPanel(1); renderSteps(1); }
+
+// ════════════ BULK FLOW ════════════
+const bZone=document.getElementById('b-upload-zone');
+bZone.addEventListener('dragover',e=>{e.preventDefault();bZone.classList.add('drag');});
+bZone.addEventListener('dragleave',()=>bZone.classList.remove('drag'));
+bZone.addEventListener('drop',e=>{e.preventDefault();bZone.classList.remove('drag');bAddFiles(e.dataTransfer.files);});
+
+function bAddFiles(files){
+  Array.from(files).forEach(f=>{
+    if(!bFiles.find(b=>b.file.name===f.name && b.file.size===f.size))
+      bFiles.push({file:f,note:'',account:null,txs:[],meta:{},status:'pending'});
+  });
+  bRenderQueue();
+  document.getElementById('b-btn-1').disabled=bFiles.length===0;
+}
+function bRenderQueue(){
+  const q=document.getElementById('b-file-queue');
+  q.innerHTML=bFiles.map((b,i)=>{
+    const sz=b.file.size>1024*1024?(b.file.size/1024/1024).toFixed(1)+'MB':Math.round(b.file.size/1024)+'KB';
+    const isPdf=b.file.name.toLowerCase().endsWith('.pdf');
+    const isImg=['jpg','jpeg','png','heic','heif'].some(e=>b.file.name.toLowerCase().endsWith(e));
+    const canPreview=isPdf||isImg;
+    return `
+    <div class="file-item" id="bfi-${i}">
+      <div class="file-item-header">
+        <span class="file-icon-sm">${fileIcon(b.file)}</span>
+        <div class="file-meta">
+          <div class="file-name">${b.file.name}</div>
+          <div class="file-size">${sz}</div>
+        </div>
+        <span class="file-status ${b.status}" id="bst-${i}">${b.status==='pending'?'pendiente':b.status}</span>
+        <button class="file-remove" onclick="bRemoveFile(${i})">✕</button>
+      </div>
+      <div class="file-note-wrap">
+        <div class="file-note-label">
+          📝 Nota
+          ${canPreview?`<button class="file-preview-btn" onclick="bTogglePreview(${i})">vista previa</button>`:''}
+        </div>
+        <textarea class="file-note-input" id="bnote-${i}" placeholder="Ej: La mitad la paga Felipe · Debo rendir · Viaje de trabajo..." oninput="bFiles[${i}].note=this.value">${b.note}</textarea>
+        <div class="note-examples" style="margin-top:5px">
+          <span class="note-chip" onclick="bAppendNote(${i},'Debo rendir')">📋 Rendir</span>
+          <span class="note-chip" onclick="bAppendNote(${i},'Pago compartido')">👥 Compartido</span>
+          <span class="note-chip" onclick="bAppendNote(${i},'Reembolso empresa')">💼 Empresa</span>
+          <span class="note-chip" onclick="bAppendNote(${i},'En cuotas')">💳 Cuotas</span>
+        </div>
+      </div>
+      <div id="bprev-${i}" style="display:none" class="file-preview-wrap"></div>
+    </div>`;
+  }).join('');
+}
+function bAppendNote(i,text){ bFiles[i].note=(bFiles[i].note?bFiles[i].note+' — '+text:text); document.getElementById('bnote-'+i).value=bFiles[i].note; }
+function bRemoveFile(i){ bFiles.splice(i,1); bRenderQueue(); document.getElementById('b-btn-1').disabled=bFiles.length===0; }
+
+async function bTogglePreview(i){
+  const wrap=document.getElementById('bprev-'+i);
+  if(wrap.style.display==='block'){ wrap.style.display='none'; return; }
+  const f=bFiles[i].file;
+  const isPdf=f.name.toLowerCase().endsWith('.pdf');
+  const isImg=['jpg','jpeg','png','heic','heif'].some(e=>f.name.toLowerCase().endsWith(e));
+  if(!wrap.innerHTML){
+    const url=URL.createObjectURL(f);
+    if(isPdf) wrap.innerHTML=`<iframe src="${url}"></iframe>`;
+    else if(isImg) wrap.innerHTML=`<img src="${url}" alt="preview">`;
+  }
+  wrap.style.display='block';
+}
+
+function bGoStep(n){ bGoPanel(n); renderSteps(n); }
+function bGoPanel(n){
+  document.querySelectorAll('#bulk-flow .panel').forEach((p,i)=>p.classList.toggle('active',i+1===n));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(n===2) bRenderAssign();
+}
+function bRenderAssign(){
+  document.getElementById('b-assign-list').innerHTML=bFiles.map((b,i)=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+        <span>${fileIcon(b.file)}</span>
+        <div style="font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.file.name}</div>
+      </div>
+      ${b.note?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-style:italic">📝 "${b.note}"</div>`:''}
+      <select class="cat-sel" style="width:100%;max-width:none;font-size:12px;padding:7px 9px" onchange="bFiles[${i}].account=ACCOUNTS.find(a=>a.id===this.value);bCheckAllAssigned()" id="bacc-${i}">
+        <option value="">— Selecciona cuenta —</option>
+        ${ACC_OPTS}
+      </select>
+    </div>`).join('');
+  document.getElementById('b-btn-2').disabled=true;
+}
+function bCheckAllAssigned(){ document.getElementById('b-btn-2').disabled=bFiles.some(b=>!b.account); }
+
+async function bProcess(){
+  bGoPanel(3); renderSteps(3);
+  // Render progress bars
+  document.getElementById('b-progress-list').innerHTML=bFiles.map((b,i)=>`
+    <div class="bulk-file-row" id="bpr-${i}">
+      <span>${fileIcon(b.file)}</span>
+      <div class="bulk-file-name">${b.file.name}</div>
+      <div class="bulk-bar-wrap"><div class="bulk-bar-bg"><div class="bulk-bar-fill" id="bbar-${i}" style="width:0%"></div></div></div>
+      <div class="bulk-count" id="bcnt-${i}">—</div>
+      <span class="file-status pending" id="bst2-${i}">pendiente</span>
+    </div>`).join('');
+
+  let totalTxs=0;
+  for(let i=0;i<bFiles.length;i++){
+    const b=bFiles[i];
+    const stEl=document.getElementById('bst2-'+i);
+    const barEl=document.getElementById('bbar-'+i);
+    const cntEl=document.getElementById('bcnt-'+i);
+    stEl.className='file-status processing'; stEl.textContent='procesando';
+    document.getElementById('b-proc-title').textContent=`Procesando ${i+1}/${bFiles.length}...`;
+    document.getElementById('b-proc-sub').textContent=b.file.name;
+    try {
+      barEl.style.width='30%';
+      const {base64,mediaType}=await fileToBase64(b.file);
+      barEl.style.width='60%';
+      // Drive upload
+      let driveUrl=null,driveFileId=null;
+      const sName=stdName(b.file,b.account);
+      if(driveToken){
+        const dr=await uploadToDrive(b.file,sName);
+        if(dr){driveUrl=dr.url;driveFileId=dr.fileId;}
+      }
+      barEl.style.width='80%';
+      const parsed=await callClaude(base64,mediaType,b.file.name,b.account);
+      b.txs=(parsed.transactions||[]).map((t,j)=>({...t,included:true,id_temp:'b'+i+'t'+j}));
+      b.meta={account_id:b.account.id,original_filename:b.file.name,standardized_filename:sName,source_type:b.file.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:b.note};
+      b.status='done';
+      barEl.style.width='100%'; barEl.style.background='var(--success)';
+      stEl.className='file-status done'; stEl.textContent='✓ '+b.txs.length;
+      cntEl.textContent=b.txs.length+' txs';
+      totalTxs+=b.txs.length;
+    } catch(e){
+      b.status='error';
+      stEl.className='file-status error'; stEl.textContent='error';
+      barEl.style.background='var(--danger)';
+      console.error('Error processing',b.file.name,e);
+    }
+  }
+  document.getElementById('b-spinner').style.display='none';
+  document.getElementById('b-proc-title').textContent='¡Listo! '+totalTxs+' transacciones extraídas';
+  setTimeout(()=>{ bRenderPreviewAll(); bGoPanel(4); renderSteps(4); },800);
+}
+
+function bRenderPreviewAll(){
+  const acc=document.getElementById('b-preview-accordion');
+  acc.innerHTML=bFiles.filter(b=>b.status==='done').map((b,i)=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">
+      <div style="padding:.8rem 1rem;display:flex;align-items:center;gap:9px;cursor:pointer;border-bottom:1px solid var(--border)" onclick="bTogAcc(${i})">
+        <span>${fileIcon(b.file)}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.file.name}</div>
+          ${b.note?`<div style="font-size:10px;color:var(--text3);margin-top:1px">📝 ${b.note}</div>`:''}
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent)">${b.txs.filter(t=>t.included).length} txs</div>
+        <div id="bacc-arr-${i}" style="color:var(--text3);font-size:12px">▼</div>
+      </div>
+      <div id="bacc-body-${i}" style="display:none;padding:.8rem">
+        <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
+          <table style="width:100%;border-collapse:collapse;font-size:11px">
+            <thead><tr><th style="background:var(--surface2);padding:6px 8px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)"></th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Fecha</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Descripción</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Monto</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Categoría</th></tr></thead>
+            <tbody>${b.txs.map((t,j)=>`
+              <tr id="brow-${i}-${j}" class="${t.included?'':'excluded'}" style="border-top:1px solid var(--border)">
+                <td style="padding:5px 8px"><button class="row-tog" onclick="bTogRow(${i},${j})">${t.included?'✕':'+'}</button></td>
+                <td class="td-date" style="padding:5px 8px">${t.date}</td>
+                <td style="padding:5px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">${(t.description_clean||'').slice(0,35)}</td>
+                <td class="td-amt ${t.amount<0?'neg':'pos'}" style="padding:5px 8px">${t.amount<0?'':'+'}$${Math.abs(t.amount).toLocaleString('es-CL')}</td>
+                <td style="padding:5px 8px"><select class="cat-sel" onchange="bFiles[${i}].txs[${j}].category_slug=this.value">${CAT_OPTS.replace(`value="${t.category_slug}"`,`value="${t.category_slug}" selected`)}</select></td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function bTogAcc(i){
+  const body=document.getElementById('bacc-body-'+i);
+  const arr=document.getElementById('bacc-arr-'+i);
+  const open=body.style.display==='block';
+  body.style.display=open?'none':'block';
+  arr.textContent=open?'▼':'▲';
+}
+function bTogRow(fi,ti){ bFiles[fi].txs[ti].included=!bFiles[fi].txs[ti].included; bRenderPreviewAll(); }
+
+async function bConfirmAll(){
+  const btn=document.getElementById('b-btn-confirm');
+  btn.disabled=true; btn.textContent='Importando...';
+  let totalIns=0,totalSkip=0,totalFiles=0;
+  try {
+    for(const b of bFiles.filter(f=>f.status==='done')){
+      const toIns=b.txs.filter(t=>t.included);
+      if(!toIns.length) continue;
+      const {inserted,skipped}=await insertToSupabase(toIns,b.meta);
+      totalIns+=inserted; totalSkip+=skipped; totalFiles++;
+    }
+    document.getElementById('b-success-sub').textContent=`${totalIns} transacciones nuevas de ${totalFiles} archivos · ${totalSkip} duplicadas omitidas`;
+    document.getElementById('b-success-grid').innerHTML=`
+      <div class="s-card"><div class="s-label">Archivos</div><div class="s-val">${totalFiles}</div></div>
+      <div class="s-card"><div class="s-label">Insertadas</div><div class="s-val">${totalIns}</div></div>
+      <div class="s-card"><div class="s-label">Omitidas</div><div class="s-val">${totalSkip}</div></div>`;
+    bGoPanel(5); renderSteps(5);
+  } catch(e){ toast('Error: '+e.message,true); btn.disabled=false; btn.textContent='Importar todo →'; }
+}
+function resetBulk(){ bFiles=[]; bRenderQueue(); document.getElementById('b-file-input').value=''; document.getElementById('b-btn-1').disabled=true; bGoPanel(1); renderSteps(1); }
+
+// ── INIT ──
+setMode('single');
+renderSteps(1);
+renderDriveStatus('s-drive-section');
+if(localStorage.getItem('goog_client_id')) connectDrive('s-drive-section');
+</script>
+</body>
+</html>
