@@ -506,24 +506,45 @@ function _driveAuth(clientId,cid){
 function disconnectDrive(){ driveToken=null; renderDriveStatus('s-drive-section'); }
 
 async function uploadToDrive(file, filename){
-  if(!driveToken) return null;
+  // Always get a fresh token before uploading
+  const freshToken = await getFreshDriveToken();
+  if(!freshToken) return null;
   try {
-    const fRes=await fetch("https://www.googleapis.com/drive/v3/files?q=name='Fintrack CL' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)",{headers:{'Authorization':'Bearer '+driveToken}});
+    const fRes=await fetch("https://www.googleapis.com/drive/v3/files?q=name='Fintrack CL' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)",{headers:{'Authorization':'Bearer '+freshToken}});
     const fData=await fRes.json();
     let folderId;
     if(fData.files?.length>0){ folderId=fData.files[0].id; }
     else {
-      const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+driveToken,'Content-Type':'application/json'},body:JSON.stringify({name:'Fintrack CL',mimeType:'application/vnd.google-apps.folder'})});
+      const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+freshToken,'Content-Type':'application/json'},body:JSON.stringify({name:'Fintrack CL',mimeType:'application/vnd.google-apps.folder'})});
       folderId=(await cr.json()).id;
     }
     const meta=JSON.stringify({name:filename,parents:[folderId]});
     const form=new FormData();
     form.append('metadata',new Blob([meta],{type:'application/json'}));
     form.append('file',file);
-    const upRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+driveToken},body:form});
+    const upRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+freshToken},body:form});
     const up=await upRes.json();
+    if(up.error) throw new Error(JSON.stringify(up.error));
     return up.id ? {fileId:up.id,url:up.webViewLink} : null;
   } catch(e){ console.error('Drive upload failed:',e); return null; }
+}
+
+function getFreshDriveToken(){
+  return new Promise((resolve) => {
+    const clientId = localStorage.getItem('goog_client_id');
+    if(!clientId || !window.google){ resolve(null); return; }
+    try {
+      google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: 'https://www.googleapis.com/auth/drive.file',
+        callback: (r) => {
+          if(r.error){ console.error('Drive token error:',r.error); resolve(null); return; }
+          driveToken = r.access_token;
+          resolve(r.access_token);
+        }
+      }).requestAccessToken({ prompt: '' });
+    } catch(e){ console.error('Drive auth error:',e); resolve(null); }
+  });
 }
 
 // ── HELPERS ──
@@ -553,9 +574,16 @@ async function callClaude(base64,mediaType,filename,account){
 {"bank_detected":"string","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","transactions":[{"date":"YYYY-MM-DD","description_raw":"string","description_clean":"string sin sufijos","amount":-15000,"currency":"CLP","category_slug":"food"}]}
 Reglas: amount NEGATIVO=gasto, POSITIVO=pago/abono. USD en centavos (7.23→723). category_slug: food,transport,shopping,health,entertainment,fitness,personal_care,utilities,housing,fees,loan_payment,payment,other,travel,donations,subscriptions,pets,education. No incluyas totales ni subtotales.`;
 
-  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8000,system:sys,messages:[{role:'user',content}]})});
-  if(!r.ok) throw new Error('Claude API '+r.status);
+  // Use Supabase Edge Function proxy to avoid CORS
+  const PROXY = `${SUPABASE_URL}/functions/v1/claude-proxy`;
+  const r = await fetch(PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY },
+    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:8000, system:sys, messages:[{role:'user',content}] })
+  });
+  if(!r.ok) throw new Error('Claude proxy error: ' + r.status + ' — ' + await r.text());
   const d=await r.json();
+  if(d.error) throw new Error('Claude error: ' + JSON.stringify(d.error));
   const txt=d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
   return JSON.parse(txt.replace(/```json|```/g,'').trim());
 }
