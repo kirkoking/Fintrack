@@ -124,6 +124,20 @@ section{margin-bottom:2rem;}
 .loan-progress-bg{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
 .loan-progress-fill{height:100%;background:linear-gradient(90deg,var(--warning),var(--accent));border-radius:3px;}
 
+/* ── RECEIPTS ── */
+.receipt-list{display:flex;flex-direction:column;gap:8px;}
+.receipt-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;display:flex;flex-direction:column;gap:8px;}
+.receipt-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+.receipt-file{font-size:12px;font-weight:600;line-height:1.3;}
+.receipt-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.receipt-total{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--accent);}
+.receipt-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;}
+.receipt-pill{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 8px;}
+.receipt-pill .k{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;}
+.receipt-pill .v{font-size:11px;color:var(--text);}
+.receipt-link{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--accent2);text-decoration:none;}
+.receipt-link:hover{text-decoration:underline;}
+
 /* ── TRANSACTIONS TABLE ── */
 .tx-controls{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
 .tx-search{flex:1;min-width:150px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
@@ -179,6 +193,7 @@ footer{text-align:center;padding:1.5rem;font-family:'DM Mono',monospace;font-siz
 <div class="tabs">
   <div class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
   <div class="tab" onclick="switchTab('transactions')">📋 Transacciones</div>
+  <div class="tab" onclick="switchTab('receipts')">🧾 Recibos</div>
   <div class="tab" onclick="switchTab('subscriptions')">🔄 Suscripciones</div>
   <div class="tab" onclick="switchTab('loans')">🏦 Créditos</div>
 </div>
@@ -266,6 +281,16 @@ footer{text-align:center;padding:1.5rem;font-family:'DM Mono',monospace;font-siz
   </div>
 </div>
 
+<!-- ══ TAB: RECEIPTS ══ -->
+<div id="tab-receipts" class="tab-panel">
+  <div class="stat-grid" style="margin-bottom:1.5rem">
+    <div class="stat-card"><div class="stat-label">Recibos con Drive</div><div class="stat-val accent" id="r-count">—</div></div>
+    <div class="stat-card"><div class="stat-label">Total recibos</div><div class="stat-val" id="r-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Última carga</div><div class="stat-val" id="r-last">—</div></div>
+  </div>
+  <div class="receipt-list" id="receipt-list"></div>
+</div>
+
 <!-- ══ TAB: SUBSCRIPTIONS ══ -->
 <div id="tab-subscriptions" class="tab-panel">
   <div class="stat-grid" style="margin-bottom:1.5rem">
@@ -330,7 +355,7 @@ const CAT_COLORS = {
   subscriptions:'#c8f060', pets:'#f0d060', education:'#60f0d0'
 };
 
-let ALL_TXS = [], ACC_MAP = {}, filteredTxs = [], currentPage = 0;
+let ALL_TXS = [], IMPORTS = [], ACC_MAP = {}, filteredTxs = [], currentPage = 0;
 const PAGE_SIZE = 50;
 let donutChart, monthlyChart;
 
@@ -346,7 +371,7 @@ function toggleTheme() {
 
 // ── Tabs ──
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['dashboard','transactions','subscriptions','loans'][i] === name));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['dashboard','transactions','receipts','subscriptions','loans'][i] === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
 }
@@ -372,17 +397,20 @@ function clpS(n) {
 async function loadData() {
   document.getElementById('last-update').textContent = '...';
   try {
-    const [txRes, accRes] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,date,description_clean,amount,currency,category_slug,account_id,notes&limit=2000&order=date.desc`, {headers: H}),
-      fetch(`${SUPABASE_URL}/rest/v1/accounts?select=id,name,bank`, {headers: H})
+    const [txRes, accRes, importRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,date,description_clean,amount,currency,category_slug,account_id,notes,import_id&limit=2000&order=date.desc`, {headers: H}),
+      fetch(`${SUPABASE_URL}/rest/v1/accounts?select=id,name,bank`, {headers: H}),
+      fetch(`${SUPABASE_URL}/rest/v1/imports?select=id,created_at,source_file,bank_detected,period_start,period_end,row_count,drive_url,user_note&order=created_at.desc&limit=300`, {headers: H})
     ]);
     ALL_TXS = await txRes.json();
     const accs = await accRes.json();
+    IMPORTS = await importRes.json();
     ACC_MAP = {};
     accs.forEach(a => ACC_MAP[a.id] = { label: `${a.bank}`, bank: a.bank, name: a.name });
     renderDashboard();
     populateFilters();
     filterTx();
+    renderReceipts();
     renderSubs();
     renderLoans();
     document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'});
@@ -390,6 +418,40 @@ async function loadData() {
     document.getElementById('last-update').textContent = 'Error';
     console.error(e);
   }
+}
+
+function renderReceipts() {
+  const withDrive = IMPORTS.filter(i => i.drive_url);
+  const total = withDrive.reduce((sum, imp) => {
+    const impTxs = ALL_TXS.filter(t => t.import_id === imp.id);
+    return sum + impTxs.reduce((s,t) => s + Math.abs(Number(t.amount || 0)), 0);
+  }, 0);
+  document.getElementById('r-count').textContent = withDrive.length.toLocaleString('es-CL');
+  document.getElementById('r-total').textContent = clpS(total);
+  document.getElementById('r-last').textContent = withDrive[0]?.created_at ? withDrive[0].created_at.slice(0,10) : '—';
+
+  document.getElementById('receipt-list').innerHTML = withDrive.map(imp => {
+    const impTxs = ALL_TXS.filter(t => t.import_id === imp.id);
+    const receiptTotal = impTxs.reduce((s,t) => s + Math.abs(Number(t.amount || 0)), 0);
+    const txCount = impTxs.length || imp.row_count || 0;
+    const period = imp.period_start && imp.period_end ? `${imp.period_start} → ${imp.period_end}` : '—';
+    return `<div class="receipt-card">
+      <div class="receipt-head">
+        <div>
+          <div class="receipt-file">${imp.source_file || 'Archivo sin nombre'}</div>
+          <div class="receipt-date">Importado: ${(imp.created_at||'').slice(0,10) || '—'}</div>
+        </div>
+        <div class="receipt-total">${clpS(receiptTotal)}</div>
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-pill"><div class="k">Banco</div><div class="v">${imp.bank_detected || '—'}</div></div>
+        <div class="receipt-pill"><div class="k">Periodo</div><div class="v">${period}</div></div>
+        <div class="receipt-pill"><div class="k">Transacciones</div><div class="v">${txCount}</div></div>
+        <div class="receipt-pill"><div class="k">Nota</div><div class="v">${imp.user_note || '—'}</div></div>
+      </div>
+      <a class="receipt-link" href="${imp.drive_url}" target="_blank" rel="noopener noreferrer">📁 Ver recibo en Google Drive</a>
+    </div>`;
+  }).join('') || '<div class="card" style="color:var(--text3);font-size:12px">Sin recibos con enlace de Drive todavía.</div>';
 }
 
 // ── Dashboard ──
@@ -544,8 +606,9 @@ function renderTxPage() {
   const start = currentPage * PAGE_SIZE;
   const page = filteredTxs.slice(start, start + PAGE_SIZE);
   const total = filteredTxs.length;
-
-  document.getElementById('pagination-info').textContent = `${start+1}–${Math.min(start+PAGE_SIZE,total)} de ${total.toLocaleString('es-CL')}`;
+  const from = total === 0 ? 0 : start + 1;
+  const to = total === 0 ? 0 : Math.min(start + PAGE_SIZE, total);
+  document.getElementById('pagination-info').textContent = `${from}–${to} de ${total.toLocaleString('es-CL')}`;
   document.getElementById('pg-prev').disabled = currentPage === 0;
   document.getElementById('pg-next').disabled = start + PAGE_SIZE >= total;
 
