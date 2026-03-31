@@ -124,6 +124,32 @@ section{margin-bottom:2rem;}
 .loan-progress-bg{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;}
 .loan-progress-fill{height:100%;background:linear-gradient(90deg,var(--warning),var(--accent));border-radius:3px;}
 
+/* ── RECEIPTS ── */
+.receipt-list{display:flex;flex-direction:column;gap:8px;}
+.receipt-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem;display:flex;flex-direction:column;gap:8px;}
+.receipt-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;}
+.receipt-file{font-size:12px;font-weight:600;line-height:1.3;}
+.receipt-date{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);}
+.receipt-total{font-family:'DM Serif Display',serif;font-size:1.2rem;color:var(--accent);}
+.receipt-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:6px;}
+.receipt-pill{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 8px;}
+.receipt-pill .k{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;}
+.receipt-pill .v{font-size:11px;color:var(--text);}
+.receipt-link{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--accent2);text-decoration:none;}
+.receipt-link:hover{text-decoration:underline;}
+
+/* ── DASHBOARD CHATBOT ── */
+.bot-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;}
+.bot-log{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:.8rem;}
+.bot-msg{padding:.6rem .8rem;border-radius:10px;font-size:12px;line-height:1.45;}
+.bot-msg.user{background:var(--accent-dim);border:1px solid var(--accent);align-self:flex-end;max-width:85%;}
+.bot-msg.assistant{background:var(--surface2);border:1px solid var(--border);align-self:flex-start;max-width:90%;}
+.bot-row{display:flex;gap:7px;align-items:center;}
+.bot-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:12px;outline:none;}
+.bot-input:focus{border-color:var(--accent);}
+.bot-btn{background:var(--accent);border:1px solid var(--accent);color:var(--bg);border-radius:8px;padding:8px 12px;font-size:12px;cursor:pointer;}
+.bot-btn:disabled{opacity:.5;cursor:not-allowed;}
+
 /* ── TRANSACTIONS TABLE ── */
 .tx-controls{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
 .tx-search{flex:1;min-width:150px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;}
@@ -179,6 +205,7 @@ footer{text-align:center;padding:1.5rem;font-family:'DM Mono',monospace;font-siz
 <div class="tabs">
   <div class="tab active" onclick="switchTab('dashboard')">📊 Dashboard</div>
   <div class="tab" onclick="switchTab('transactions')">📋 Transacciones</div>
+  <div class="tab" onclick="switchTab('receipts')">🧾 Recibos</div>
   <div class="tab" onclick="switchTab('subscriptions')">🔄 Suscripciones</div>
   <div class="tab" onclick="switchTab('loans')">🏦 Créditos</div>
 </div>
@@ -226,6 +253,19 @@ footer{text-align:center;padding:1.5rem;font-family:'DM Mono',monospace;font-siz
     <div class="anomaly-list" id="anomaly-list"></div>
   </section>
 
+  <section>
+    <div class="section-title">🤖 Asistente de análisis (Supabase)</div>
+    <div class="bot-wrap">
+      <div class="bot-log" id="bot-log">
+        <div class="bot-msg assistant">Hola, soy tu analista financiero. Pregúntame sobre gastos, categorías, meses, comercios o tendencias.</div>
+      </div>
+      <div class="bot-row">
+        <input class="bot-input" id="bot-input" placeholder="Ej: ¿Dónde estoy gastando más este mes?" onkeydown="if(event.key==='Enter'){askDashboardBot()}">
+        <button class="bot-btn" id="bot-btn" onclick="askDashboardBot()">Preguntar</button>
+      </div>
+    </div>
+  </section>
+
 </div>
 
 <!-- ══ TAB: TRANSACTIONS ══ -->
@@ -264,6 +304,16 @@ footer{text-align:center;padding:1.5rem;font-family:'DM Mono',monospace;font-siz
       <button class="pg-btn" id="pg-next" onclick="changePage(1)">Siguiente →</button>
     </div>
   </div>
+</div>
+
+<!-- ══ TAB: RECEIPTS ══ -->
+<div id="tab-receipts" class="tab-panel">
+  <div class="stat-grid" style="margin-bottom:1.5rem">
+    <div class="stat-card"><div class="stat-label">Recibos con Drive</div><div class="stat-val accent" id="r-count">—</div></div>
+    <div class="stat-card"><div class="stat-label">Total recibos</div><div class="stat-val" id="r-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Última carga</div><div class="stat-val" id="r-last">—</div></div>
+  </div>
+  <div class="receipt-list" id="receipt-list"></div>
 </div>
 
 <!-- ══ TAB: SUBSCRIPTIONS ══ -->
@@ -330,9 +380,10 @@ const CAT_COLORS = {
   subscriptions:'#c8f060', pets:'#f0d060', education:'#60f0d0'
 };
 
-let ALL_TXS = [], ACC_MAP = {}, filteredTxs = [], currentPage = 0;
+let ALL_TXS = [], IMPORTS = [], ACC_MAP = {}, filteredTxs = [], currentPage = 0;
 const PAGE_SIZE = 50;
 let donutChart, monthlyChart;
+let botBusy = false;
 
 // ── Theme ──
 function toggleTheme() {
@@ -346,7 +397,7 @@ function toggleTheme() {
 
 // ── Tabs ──
 function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['dashboard','transactions','subscriptions','loans'][i] === name));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['dashboard','transactions','receipts','subscriptions','loans'][i] === name));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
 }
@@ -372,23 +423,150 @@ function clpS(n) {
 async function loadData() {
   document.getElementById('last-update').textContent = '...';
   try {
-    const [txRes, accRes] = await Promise.all([
-      fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,date,description_clean,amount,currency,category_slug,account_id,notes&limit=2000&order=date.desc`, {headers: H}),
-      fetch(`${SUPABASE_URL}/rest/v1/accounts?select=id,name,bank`, {headers: H})
+    const [allTxs, accRes, allImports] = await Promise.all([
+      fetchAllRows('transactions', 'id,date,description_clean,amount,currency,category_slug,account_id,notes,import_id', 'date.desc'),
+      fetch(`${SUPABASE_URL}/rest/v1/accounts?select=id,name,bank`, {headers: H}),
+      fetchAllRows('imports', 'id,created_at,source_file,bank_detected,period_start,period_end,row_count,drive_url,user_note', 'created_at.desc')
     ]);
-    ALL_TXS = await txRes.json();
+    ALL_TXS = allTxs;
     const accs = await accRes.json();
+    IMPORTS = allImports;
     ACC_MAP = {};
     accs.forEach(a => ACC_MAP[a.id] = { label: `${a.bank}`, bank: a.bank, name: a.name });
     renderDashboard();
     populateFilters();
     filterTx();
+    renderReceipts();
     renderSubs();
     renderLoans();
     document.getElementById('last-update').textContent = new Date().toLocaleTimeString('es-CL', {hour:'2-digit',minute:'2-digit'});
   } catch(e) {
     document.getElementById('last-update').textContent = 'Error';
     console.error(e);
+  }
+}
+
+async function fetchAllRows(table, select, orderBy, pageSize = 1000) {
+  let offset = 0;
+  let rows = [];
+  while (true) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?select=${encodeURIComponent(select)}&order=${encodeURIComponent(orderBy)}&limit=${pageSize}&offset=${offset}`, { headers: H });
+    if (!res.ok) throw new Error(`Error cargando ${table}: ${res.status}`);
+    const page = await res.json();
+    rows = rows.concat(page);
+    if (page.length < pageSize) break;
+    offset += pageSize;
+  }
+  return rows;
+}
+
+function renderReceipts() {
+  const withDrive = IMPORTS.filter(i => i.drive_url);
+  const total = withDrive.reduce((sum, imp) => {
+    const impTxs = ALL_TXS.filter(t => t.import_id === imp.id);
+    return sum + impTxs.reduce((s,t) => s + Math.abs(Number(t.amount || 0)), 0);
+  }, 0);
+  document.getElementById('r-count').textContent = withDrive.length.toLocaleString('es-CL');
+  document.getElementById('r-total').textContent = clpS(total);
+  document.getElementById('r-last').textContent = withDrive[0]?.created_at ? withDrive[0].created_at.slice(0,10) : '—';
+
+  document.getElementById('receipt-list').innerHTML = withDrive.map(imp => {
+    const impTxs = ALL_TXS.filter(t => t.import_id === imp.id);
+    const receiptTotal = impTxs.reduce((s,t) => s + Math.abs(Number(t.amount || 0)), 0);
+    const txCount = impTxs.length || imp.row_count || 0;
+    const period = imp.period_start && imp.period_end ? `${imp.period_start} → ${imp.period_end}` : '—';
+    return `<div class="receipt-card">
+      <div class="receipt-head">
+        <div>
+          <div class="receipt-file">${imp.source_file || 'Archivo sin nombre'}</div>
+          <div class="receipt-date">Importado: ${(imp.created_at||'').slice(0,10) || '—'}</div>
+        </div>
+        <div class="receipt-total">${clpS(receiptTotal)}</div>
+      </div>
+      <div class="receipt-meta">
+        <div class="receipt-pill"><div class="k">Banco</div><div class="v">${imp.bank_detected || '—'}</div></div>
+        <div class="receipt-pill"><div class="k">Periodo</div><div class="v">${period}</div></div>
+        <div class="receipt-pill"><div class="k">Transacciones</div><div class="v">${txCount}</div></div>
+        <div class="receipt-pill"><div class="k">Nota</div><div class="v">${imp.user_note || '—'}</div></div>
+      </div>
+      <a class="receipt-link" href="${imp.drive_url}" target="_blank" rel="noopener noreferrer">📁 Ver recibo en Google Drive</a>
+    </div>`;
+  }).join('') || '<div class="card" style="color:var(--text3);font-size:12px">Sin recibos con enlace de Drive todavía.</div>';
+}
+
+function botPush(role, text) {
+  const log = document.getElementById('bot-log');
+  const div = document.createElement('div');
+  div.className = `bot-msg ${role}`;
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+function buildBotContext() {
+  const charges = ALL_TXS.filter(t => t.amount < 0 && t.currency === 'CLP');
+  const topCats = Object.entries(charges.reduce((acc, t) => {
+    acc[t.category_slug || 'other'] = (acc[t.category_slug || 'other'] || 0) + Math.abs(Number(t.amount || 0));
+    return acc;
+  }, {})).sort((a,b)=>b[1]-a[1]).slice(0,8);
+
+  const monthly = {};
+  charges.forEach(t => {
+    const ym = (t.date || '').slice(0,7);
+    if (!ym) return;
+    monthly[ym] = (monthly[ym] || 0) + Math.abs(Number(t.amount || 0));
+  });
+  const topMonths = Object.entries(monthly).sort((a,b)=>b[1]-a[1]).slice(0,6);
+
+  return {
+    tx_count: ALL_TXS.length,
+    import_count: IMPORTS.length,
+    top_categories: topCats.map(([k,v]) => ({ category: CATS[k] || k, amount: Math.round(v) })),
+    top_months: topMonths.map(([m,v]) => ({ month: m, amount: Math.round(v) })),
+    recent_transactions: ALL_TXS.slice(0, 120).map(t => ({
+      date: t.date,
+      description: t.description_clean,
+      amount: t.amount,
+      category: t.category_slug,
+      bank: ACC_MAP[t.account_id]?.bank || '—'
+    }))
+  };
+}
+
+async function askDashboardBot() {
+  const input = document.getElementById('bot-input');
+  const btn = document.getElementById('bot-btn');
+  const question = (input.value || '').trim();
+  if (!question || botBusy) return;
+
+  botBusy = true;
+  btn.disabled = true;
+  botPush('user', question);
+  input.value = '';
+
+  try {
+    const context = buildBotContext();
+    const system = 'Eres un analista financiero de Fintrack. Responde en español con recomendaciones prácticas, cifras y observaciones. Si falta contexto, dilo claramente.';
+    const userPrompt = `Pregunta del usuario: ${question}\n\nContexto de Supabase (resumen JSON):\n${JSON.stringify(context)}`;
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/claude-proxy`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        system,
+        messages: [{ role: 'user', content: [{ type: 'text', text: userPrompt }] }]
+      })
+    });
+    if (!res.ok) throw new Error(`Bot error ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    const text = (data.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n').trim();
+    botPush('assistant', text || 'No pude generar una respuesta en este momento.');
+  } catch (e) {
+    botPush('assistant', `No pude responder ahora: ${e.message}`);
+  } finally {
+    botBusy = false;
+    btn.disabled = false;
   }
 }
 
@@ -544,8 +722,9 @@ function renderTxPage() {
   const start = currentPage * PAGE_SIZE;
   const page = filteredTxs.slice(start, start + PAGE_SIZE);
   const total = filteredTxs.length;
-
-  document.getElementById('pagination-info').textContent = `${start+1}–${Math.min(start+PAGE_SIZE,total)} de ${total.toLocaleString('es-CL')}`;
+  const from = total === 0 ? 0 : start + 1;
+  const to = total === 0 ? 0 : Math.min(start + PAGE_SIZE, total);
+  document.getElementById('pagination-info').textContent = `${from}–${to} de ${total.toLocaleString('es-CL')}`;
   document.getElementById('pg-prev').disabled = currentPage === 0;
   document.getElementById('pg-next').disabled = start + PAGE_SIZE >= total;
 

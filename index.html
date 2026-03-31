@@ -381,16 +381,23 @@ const ACCOUNTS = [
   {id:'96d3b64c-f35c-4ae1-8460-5dadf1d009e5',bank:'Banco de Chile',name:'TC Internacional',currency:'USD'},
   {id:'f30ac63e-b0e2-4b5f-ad62-fd7a7671ff0b',bank:'Tenpo',name:'TC Digital',currency:'CLP'},
   {id:'b3428f73-ae68-48ce-820c-3dcae69d9873',bank:'CMR Falabella',name:'TC CMR',currency:'CLP'},
+  {id:'other-payment-method',bank:'Otro',name:'Otro medio de pago',currency:'—',is_virtual:true},
+  {id:'forgot-payment-method',bank:'No recuerdo',name:'No recuerdo el medio',currency:'—',is_virtual:true},
 ];
 const CATS = {food:'Comida',transport:'Transporte',shopping:'Compras',health:'Salud',entertainment:'Entretención',fitness:'Fitness',personal_care:'Cuidado personal',utilities:'Servicios',housing:'Vivienda',fees:'Comisiones',loan_payment:'Cuota préstamo',payment:'Pago tarjeta',other:'Otro',travel:'Viajes',donations:'Donaciones',subscriptions:'Suscripciones',pets:'Mascotas',education:'Educación'};
 const CAT_OPTS = Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
 const ACC_OPTS = ACCOUNTS.map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('');
+const DEFAULT_GOOGLE_CLIENT_ID = '278945344888-e64ht5tfpoeksk29n0dsha6fpstqjh14.apps.googleusercontent.com';
 
-let mode = 'single', driveToken = null;
+let mode = 'single', driveToken = null, lastDriveError = null;
 // Single state
 let sFile = null, sAccount = null, sTxs = [], sMeta = {};
 // Bulk state
 let bFiles = []; // [{file, note, account, txs, meta, status}]
+
+function getGoogleClientId(){
+  return localStorage.getItem('goog_client_id') || DEFAULT_GOOGLE_CLIENT_ID;
+}
 
 // ── THEME ──
 function toggleTheme(){
@@ -437,7 +444,7 @@ function renderSteps(step){
 
 // ── DRIVE ──
 function renderDriveStatus(containerId){
-  const clientId = localStorage.getItem('goog_client_id');
+  const clientId = getGoogleClientId();
   const el = document.getElementById(containerId);
   if(!el) return;
   el.innerHTML = `
@@ -473,7 +480,7 @@ function saveDriveId(cid){
   connectDrive(cid);
 }
 function connectDrive(cid){
-  const clientId=localStorage.getItem('goog_client_id');
+  const clientId=getGoogleClientId();
   if(!clientId) return;
   const dot=document.getElementById('d-dot-'+cid);
   const txt=document.getElementById('d-text-'+cid);
@@ -506,32 +513,54 @@ function _driveAuth(clientId,cid){
 function disconnectDrive(){ driveToken=null; renderDriveStatus('s-drive-section'); }
 
 async function uploadToDrive(file, filename){
-  // Always get a fresh token before uploading
-  const freshToken = await getFreshDriveToken();
-  if(!freshToken) return null;
+  lastDriveError = null;
+  const baseToken = driveToken || await getFreshDriveToken();
+  if(!baseToken){
+    lastDriveError = 'No se pudo obtener token OAuth de Google Drive';
+    return null;
+  }
   try {
-    const fRes=await fetch("https://www.googleapis.com/drive/v3/files?q=name='Fintrack CL' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)",{headers:{'Authorization':'Bearer '+freshToken}});
-    const fData=await fRes.json();
-    let folderId;
-    if(fData.files?.length>0){ folderId=fData.files[0].id; }
-    else {
-      const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+freshToken,'Content-Type':'application/json'},body:JSON.stringify({name:'Fintrack CL',mimeType:'application/vnd.google-apps.folder'})});
-      folderId=(await cr.json()).id;
+    const uploadWithToken = async (token) => {
+      const fRes=await fetch("https://www.googleapis.com/drive/v3/files?q=name='Fintrack CL' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)",{headers:{'Authorization':'Bearer '+token}});
+      const fData=await fRes.json();
+      if(!fRes.ok || fData.error) throw new Error(`folder_lookup: ${fData?.error?.message || fRes.status}`);
+      let folderId;
+      if(fData.files?.length>0){ folderId=fData.files[0].id; }
+      else {
+        const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({name:'Fintrack CL',mimeType:'application/vnd.google-apps.folder'})});
+        const crData=await cr.json();
+        if(!cr.ok || crData.error) throw new Error(`folder_create: ${crData?.error?.message || cr.status}`);
+        folderId=crData.id;
+      }
+      const meta=JSON.stringify({name:filename,parents:[folderId]});
+      const form=new FormData();
+      form.append('metadata',new Blob([meta],{type:'application/json'}));
+      form.append('file',file);
+      const upRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+token},body:form});
+      const up=await upRes.json();
+      if(!upRes.ok || up.error) throw new Error(`file_upload: ${up?.error?.message || upRes.status}`);
+      return up.id ? {fileId:up.id,url:up.webViewLink} : null;
+    };
+
+    try {
+      return await uploadWithToken(baseToken);
+    } catch(e) {
+      if(String(e.message).includes('401') || String(e.message).toLowerCase().includes('invalid credentials')){
+        const freshToken = await getFreshDriveToken();
+        if(freshToken) return await uploadWithToken(freshToken);
+      }
+      throw e;
     }
-    const meta=JSON.stringify({name:filename,parents:[folderId]});
-    const form=new FormData();
-    form.append('metadata',new Blob([meta],{type:'application/json'}));
-    form.append('file',file);
-    const upRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+freshToken},body:form});
-    const up=await upRes.json();
-    if(up.error) throw new Error(JSON.stringify(up.error));
-    return up.id ? {fileId:up.id,url:up.webViewLink} : null;
-  } catch(e){ console.error('Drive upload failed:',e); return null; }
+  } catch(e){
+    lastDriveError = e.message || 'Error desconocido subiendo archivo a Drive';
+    console.error('Drive upload failed:',e);
+    return null;
+  }
 }
 
 function getFreshDriveToken(){
   return new Promise((resolve) => {
-    const clientId = localStorage.getItem('goog_client_id');
+    const clientId = getGoogleClientId();
     if(!clientId || !window.google){ resolve(null); return; }
     try {
       google.accounts.oauth2.initTokenClient({
@@ -697,7 +726,10 @@ async function sProcess(){
       document.getElementById('s-proc-title').textContent='Guardando en Drive...';
       const dr=await uploadToDrive(sFile,sName);
       if(dr){ driveUrl=dr.url; driveFileId=dr.fileId; sLog('✓ Drive: '+sName,'log-ok'); }
-      else sLog('⚠ Drive falló — continuando','log-err');
+      else {
+        sLog('⚠ Drive falló — continuando','log-err');
+        if(lastDriveError) sLog('   ↳ '+lastDriveError,'log-err');
+      }
     } else { sLog('ℹ Drive no configurado','log-line'); }
 
     sLog('📖 Leyendo archivo...','log-info');
@@ -709,8 +741,9 @@ async function sProcess(){
     document.getElementById('s-proc-sub').textContent='Extrayendo transacciones';
 
     const parsed=await callClaude(base64,mediaType,sFile.name,sAccount);
+    const selectedAccountId = sAccount?.is_virtual ? null : sAccount?.id;
     sTxs=(parsed.transactions||[]).map((t,i)=>({...t,included:true,id_temp:'t'+i}));
-    sMeta={account_id:sAccount.id,original_filename:sFile.name,standardized_filename:sName,source_type:sFile.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:docNote};
+    sMeta={account_id:selectedAccountId,original_filename:sFile.name,standardized_filename:sName,source_type:sFile.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:docNote};
 
     sLog(`✓ ${sTxs.length} transacciones extraídas`,'log-ok');
     sLog(`  Banco: ${parsed.bank_detected||'?'} · ${parsed.period_start||'?'} → ${parsed.period_end||'?'}`,'log-line');
@@ -880,11 +913,13 @@ async function bProcess(){
       if(driveToken){
         const dr=await uploadToDrive(b.file,sName);
         if(dr){driveUrl=dr.url;driveFileId=dr.fileId;}
+        else if(lastDriveError){ console.warn('Drive fallback (bulk):', lastDriveError); }
       }
       barEl.style.width='80%';
       const parsed=await callClaude(base64,mediaType,b.file.name,b.account);
+      const selectedAccountId = b.account?.is_virtual ? null : b.account?.id;
       b.txs=(parsed.transactions||[]).map((t,j)=>({...t,included:true,id_temp:'b'+i+'t'+j}));
-      b.meta={account_id:b.account.id,original_filename:b.file.name,standardized_filename:sName,source_type:b.file.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:b.note};
+      b.meta={account_id:selectedAccountId,original_filename:b.file.name,standardized_filename:sName,source_type:b.file.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:b.note};
       b.status='done';
       barEl.style.width='100%'; barEl.style.background='var(--success)';
       stEl.className='file-status done'; stEl.textContent='✓ '+b.txs.length;
