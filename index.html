@@ -31,6 +31,15 @@ header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;
 .icon-btn:hover{border-color:var(--accent);color:var(--accent);}
 main{padding:1.5rem;max-width:860px;margin:0 auto;}
 
+/* DOC TYPE SELECTOR */
+.doc-type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:1.5rem;}
+.doc-type-card{background:var(--surface);border:2px solid var(--border);border-radius:10px;padding:.9rem 1rem;cursor:pointer;transition:all 0.2s;}
+.doc-type-card:hover{border-color:var(--border2);}
+.doc-type-card.selected{border-color:var(--accent);background:var(--accent-dim);}
+.doc-type-icon{font-size:1.4rem;margin-bottom:5px;}
+.doc-type-name{font-size:12px;font-weight:600;line-height:1.3;}
+.doc-type-desc{font-size:10px;color:var(--text3);margin-top:2px;}
+
 /* MODE TOGGLE */
 .mode-toggle{display:flex;gap:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem;}
 .mode-btn{flex:1;padding:9px 16px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;border:none;color:var(--text3);transition:all 0.2s;text-align:center;}
@@ -95,7 +104,7 @@ main{padding:1.5rem;max-width:860px;margin:0 auto;}
 .acc-name{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);}
 .acc-curr{font-family:'DM Mono',monospace;font-size:8px;padding:1px 4px;border-radius:2px;background:var(--surface2);color:var(--text3);}
 
-/* SINGLE FLOW NOTE */
+/* NOTE FIELD */
 .note-field{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;}
 .note-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;}
 .note-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:vertical;min-height:80px;}
@@ -143,6 +152,11 @@ tbody td{padding:6px 9px;vertical-align:middle;}
 .td-amt{font-family:'DM Mono',monospace;white-space:nowrap;font-size:11px;}
 .td-amt.neg{color:var(--danger);}
 .td-amt.pos{color:var(--success);}
+.td-type{font-family:'DM Mono',monospace;font-size:9px;padding:1px 5px;border-radius:3px;white-space:nowrap;}
+.td-type.expense{background:rgba(240,96,96,.1);color:var(--danger);}
+.td-type.transfer_out{background:rgba(240,176,96,.1);color:var(--warning);}
+.td-type.transfer_in{background:rgba(96,240,168,.1);color:var(--success);}
+.td-type.income{background:rgba(96,200,240,.1);color:var(--accent2);}
 .cat-sel{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 4px;color:var(--text);font-family:'DM Mono',monospace;font-size:9px;outline:none;cursor:pointer;max-width:110px;}
 .cat-sel:focus{border-color:var(--accent);}
 .row-tog{background:transparent;border:none;cursor:pointer;font-size:11px;color:var(--text3);transition:color 0.2s;padding:1px 3px;}
@@ -190,7 +204,7 @@ tbody td{padding:6px 9px;vertical-align:middle;}
 <header>
   <div>
     <div class="logo-title">Fintrack · Importar</div>
-    <div class="logo-sub">Estado de cuenta → Supabase</div>
+    <div class="logo-sub">Documentos → Supabase</div>
   </div>
   <div style="display:flex;gap:7px">
     <a href="fintrack.html" class="icon-btn" title="Dashboard">←</a>
@@ -200,7 +214,32 @@ tbody td{padding:6px 9px;vertical-align:middle;}
 
 <main>
 
-<!-- MODE SELECT -->
+<!-- DOC TYPE -->
+<div class="section-title">¿Qué vas a subir?</div>
+<div class="doc-type-grid" id="doc-type-grid">
+  <div class="doc-type-card selected" onclick="selectDocType('tc')" id="dt-tc">
+    <div class="doc-type-icon">💳</div>
+    <div class="doc-type-name">Tarjeta de crédito</div>
+    <div class="doc-type-desc">Estado de cuenta TC — Itaú, BdC, Tenpo, Scotiabank, CMR</div>
+  </div>
+  <div class="doc-type-card" onclick="selectDocType('cta')" id="dt-cta">
+    <div class="doc-type-icon">🏦</div>
+    <div class="doc-type-name">Cuenta corriente / vista</div>
+    <div class="doc-type-desc">Cartola — incluye transferencias, abonos, sueldo</div>
+  </div>
+  <div class="doc-type-card" onclick="selectDocType('boleta')" id="dt-boleta">
+    <div class="doc-type-icon">🧾</div>
+    <div class="doc-type-name">Boleta / recibo</div>
+    <div class="doc-type-desc">Foto de boleta o ticket de compra</div>
+  </div>
+  <div class="doc-type-card" onclick="selectDocType('liqui')" id="dt-liqui">
+    <div class="doc-type-icon">📄</div>
+    <div class="doc-type-name">Liquidación de sueldo</div>
+    <div class="doc-type-desc">PDF de liquidación — extrae ingreso neto</div>
+  </div>
+</div>
+
+<!-- MODE TOGGLE -->
 <div class="mode-toggle">
   <button class="mode-btn active" id="mode-single-btn" onclick="setMode('single')">📄 Un archivo</button>
   <button class="mode-btn" id="mode-bulk-btn" onclick="setMode('bulk')">📦 Carga masiva</button>
@@ -209,7 +248,7 @@ tbody td{padding:6px 9px;vertical-align:middle;}
 <!-- STEPS -->
 <div class="steps" id="steps-wrap"></div>
 
-<!-- ════════ SINGLE FLOW ════════ -->
+<!-- ════ SINGLE FLOW ════ -->
 <div id="single-flow">
 
   <!-- S1: UPLOAD -->
@@ -223,24 +262,19 @@ tbody td{padding:6px 9px;vertical-align:middle;}
       <div class="fmt-pills"><span class="fmt">PDF</span><span class="fmt">XLS</span><span class="fmt">XLSX</span><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">HEIC</span></div>
     </div>
     <div id="s-file-preview" style="display:none;margin-top:.8rem"></div>
-
     <div class="divider"></div>
-
-    <div class="section-title">Nota del documento <span style="color:var(--text3);font-size:9px;font-weight:400">(opcional)</span></div>
+    <div class="section-title">Nota del documento <span style="color:var(--text3);font-size:9px">(opcional)</span></div>
     <div class="note-field">
-      <textarea class="note-textarea" id="s-doc-note" placeholder="Ej: La mitad de esto la debe pagar Felipe. / Estos gastos son del viaje de trabajo, debo rendirlos. / Compré el computador en cuotas..."></textarea>
+      <textarea class="note-textarea" id="s-doc-note" placeholder="Ej: La mitad la paga Felipe. / Debo rendir estos gastos. / Compré el computador en cuotas..."></textarea>
       <div class="note-examples">
         <span class="note-chip" onclick="appendNote('s-doc-note','Debo rendir estos gastos')">📋 Debo rendir</span>
         <span class="note-chip" onclick="appendNote('s-doc-note','La mitad la paga un tercero')">👥 Pago compartido</span>
         <span class="note-chip" onclick="appendNote('s-doc-note','Me lo reembolsa mi empresa')">💼 Reembolso empresa</span>
         <span class="note-chip" onclick="appendNote('s-doc-note','Compra en cuotas')">💳 En cuotas</span>
-        <span class="note-chip" onclick="appendNote('s-doc-note','Me lo paga un familiar')">👨‍👩‍👦 Paga familiar</span>
       </div>
     </div>
-
     <div class="divider"></div>
     <div id="s-drive-section"></div>
-
     <div style="margin-top:1rem">
       <button class="btn btn-primary" onclick="sGoStep(2)" id="s-btn-1" disabled>Continuar →</button>
     </div>
@@ -278,7 +312,12 @@ tbody td{padding:6px 9px;vertical-align:middle;}
         <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="sSelectAll(false)">Ninguno</button>
       </div>
     </div>
-    <div class="table-wrap"><table><thead><tr><th style="width:28px"></th><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Categoría</th></tr></thead><tbody id="s-tbody"></tbody></table></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:28px"></th><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Tipo</th><th>Categoría</th></tr></thead>
+        <tbody id="s-tbody"></tbody>
+      </table>
+    </div>
     <div class="btn-row">
       <button class="btn btn-secondary" onclick="sGoPanel(2)">← Volver</button>
       <button class="btn btn-primary" onclick="sConfirm()" id="s-btn-confirm">Importar a Supabase →</button>
@@ -300,19 +339,18 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     </div>
   </div>
 
-</div><!-- /single-flow -->
+</div>
 
-<!-- ════════ BULK FLOW ════════ -->
+<!-- ════ BULK FLOW ════ -->
 <div id="bulk-flow" style="display:none">
 
-  <!-- B1: FILES + NOTES -->
   <div class="panel active" id="b-panel-1">
     <div class="section-title">Agrega los archivos</div>
     <div class="upload-zone" id="b-upload-zone">
       <input type="file" id="b-file-input" accept=".pdf,.xls,.xlsx,.jpg,.jpeg,.png,.heic,.heif" multiple onchange="bAddFiles(this.files)">
       <div class="upload-icon">📦</div>
       <div class="upload-title">Arrastra múltiples archivos</div>
-      <div class="upload-sub">Puedes agregar de a poco — se acumulan</div>
+      <div class="upload-sub">Se acumulan — puedes agregar de a poco</div>
       <div class="fmt-pills"><span class="fmt">PDF</span><span class="fmt">XLS</span><span class="fmt">XLSX</span><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">HEIC</span></div>
     </div>
     <div class="file-queue" id="b-file-queue"></div>
@@ -321,7 +359,6 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     </div>
   </div>
 
-  <!-- B2: ACCOUNTS PER FILE -->
   <div class="panel" id="b-panel-2">
     <div class="section-title">Asigna cada archivo a una cuenta</div>
     <div id="b-assign-list"></div>
@@ -331,7 +368,6 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     </div>
   </div>
 
-  <!-- B3: PROCESSING ALL -->
   <div class="panel" id="b-panel-3">
     <div class="proc-wrap" style="padding:1.5rem 1rem">
       <div class="spinner" id="b-spinner"></div>
@@ -341,7 +377,6 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     <div class="bulk-progress" id="b-progress-list"></div>
   </div>
 
-  <!-- B4: PREVIEW ALL -->
   <div class="panel" id="b-panel-4">
     <div id="b-preview-accordion"></div>
     <div class="btn-row" style="margin-top:1rem">
@@ -350,7 +385,6 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     </div>
   </div>
 
-  <!-- B5: SUCCESS -->
   <div class="panel" id="b-panel-5">
     <div class="success-wrap">
       <div class="success-icon">🎉</div>
@@ -364,17 +398,17 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     </div>
   </div>
 
-</div><!-- /bulk-flow -->
+</div>
 
 </main>
 <div class="toast" id="toast"></div>
 
 <script>
-const SUPABASE_URL = 'https://japiqczoxgxnygwakmcm.supabase.co';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcGlxY3pveGd4bnlnd2FrbWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4Mzc5MDYsImV4cCI6MjA5MDQxMzkwNn0.qqtlYy-4mzjNghaCDJXAK0QU9mW5DBmtfHN8wQfjn2U';
-const SB_H = {'apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY,'Content-Type':'application/json'};
+const SUPABASE_URL='https://japiqczoxgxnygwakmcm.supabase.co';
+const ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcGlxY3pveGd4bnlnd2FrbWNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4Mzc5MDYsImV4cCI6MjA5MDQxMzkwNn0.qqtlYy-4mzjNghaCDJXAK0QU9mW5DBmtfHN8wQfjn2U';
+const SB_H={'apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY,'Content-Type':'application/json'};
 
-const ACCOUNTS = [
+const ACCOUNTS=[
   {id:'0e1f70bf-013a-416d-b6fb-bc55ed30b9f1',bank:'Itaú',name:'TC Nacional',currency:'CLP'},
   {id:'f5b382e4-4625-4b70-a890-ca44ace192fd',bank:'Scotiabank',name:'TC Nacional',currency:'CLP'},
   {id:'9636953b-d4cb-4a4a-b193-76796cc9c51d',bank:'Banco de Chile',name:'TC Nacional',currency:'CLP'},
@@ -384,195 +418,233 @@ const ACCOUNTS = [
   {id:'other-payment-method',bank:'Otro',name:'Otro medio de pago',currency:'—',is_virtual:true},
   {id:'forgot-payment-method',bank:'No recuerdo',name:'No recuerdo el medio',currency:'—',is_virtual:true},
 ];
-const CATS = {food:'Comida',transport:'Transporte',shopping:'Compras',health:'Salud',entertainment:'Entretención',fitness:'Fitness',personal_care:'Cuidado personal',utilities:'Servicios',housing:'Vivienda',fees:'Comisiones',loan_payment:'Cuota préstamo',payment:'Pago tarjeta',other:'Otro',travel:'Viajes',donations:'Donaciones',subscriptions:'Suscripciones',pets:'Mascotas',education:'Educación'};
-const CAT_OPTS = Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
-const ACC_OPTS = ACCOUNTS.map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('');
-const DEFAULT_GOOGLE_CLIENT_ID = '278945344888-e64ht5tfpoeksk29n0dsha6fpstqjh14.apps.googleusercontent.com';
+const CATS={food:'Comida',transport:'Transporte',shopping:'Compras',health:'Salud',entertainment:'Entretención',fitness:'Fitness',personal_care:'Cuidado personal',utilities:'Servicios',housing:'Vivienda',fees:'Comisiones',loan_payment:'Cuota préstamo',payment:'Pago tarjeta',other:'Otro',travel:'Viajes',donations:'Donaciones',subscriptions:'Suscripciones',pets:'Mascotas',education:'Educación'};
+const CAT_OPTS=Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+const ACC_OPTS=ACCOUNTS.map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('');
+const DEFAULT_GOOGLE_CLIENT_ID='278945344888-e64ht5tfpoeksk29n0dsha6fpstqjh14.apps.googleusercontent.com';
 
-let mode = 'single', driveToken = null, lastDriveError = null;
-// Single state
-let sFile = null, sAccount = null, sTxs = [], sMeta = {};
-// Bulk state
-let bFiles = []; // [{file, note, account, txs, meta, status}]
+let mode='single',driveToken=null,lastDriveError=null;
+let currentDocType='tc';
+let sFile=null,sAccount=null,sTxs=[],sMeta={};
+let bFiles=[];
 
-function getGoogleClientId(){
-  return localStorage.getItem('goog_client_id') || DEFAULT_GOOGLE_CLIENT_ID;
+// ── DOC TYPE ──
+function selectDocType(type){
+  currentDocType=type;
+  document.querySelectorAll('.doc-type-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('dt-'+type).classList.add('selected');
+}
+
+// ── SYSTEM PROMPT BY DOC TYPE ──
+function getSystemPrompt(docType, account){
+  const base=`Eres un parser experto de documentos financieros chilenos. Devuelve SOLO JSON válido, sin texto adicional ni markdown.
+
+Schema de respuesta:
+{
+  "bank_detected": "string",
+  "period_start": "YYYY-MM-DD",
+  "period_end": "YYYY-MM-DD",
+  "transactions": [{
+    "date": "YYYY-MM-DD",
+    "description_raw": "string",
+    "description_clean": "string limpio sin sufijos de ciudad/banco",
+    "amount": -15000,
+    "currency": "CLP",
+    "category_slug": "food",
+    "transaction_type": "expense",
+    "counterpart_name": null,
+    "counterpart_bank": null,
+    "bank_reference": null
+  }]
+}`;
+
+  if(docType==='cta'){
+    return base+`
+
+DOCUMENTO: Cartola de cuenta corriente o cuenta vista chilena.
+
+REGLAS CRÍTICAS para transaction_type:
+- "transfer_out": Transferencias enviadas a terceros. Keywords: "TRF A ", "TRANSF A ", "PAGO A ", "ENV A ", "TRANSFERENCIA ELECTRONICA A", nombres de personas/empresas recibiendo dinero.
+- "transfer_in": Abonos recibidos. Keywords: "ABONO", "DEP", "TRANSFERENCIA DE ", "TRANSF DE ", nombres enviando dinero, "REMUNERACION", "SUELDO", "HONORARIOS RECIBIDOS".
+- "income": Depósito de remuneración/sueldo, liquidación de sueldo, honorarios, pensiones, devoluciones de impuestos. Amount debe ser POSITIVO.
+- "expense": Compras con tarjeta de débito, pagos de servicios, ATM/giro de efectivo, comisiones, cargos.
+- "payment": Pago a tarjeta de crédito propia (keywords: "PAGO TC", "PAGO TARJETA").
+
+Para transfer_out y transfer_in, extrae counterpart_name (nombre del tercero) y counterpart_bank si aparece.
+Para bank_reference, extrae el número de operación o comprobante si existe.
+
+amount: NEGATIVO para salidas de dinero (gastos, transferencias enviadas, pagos). POSITIVO para entradas (abonos, transferencias recibidas, ingresos).
+
+NO incluyas saldos, totales ni líneas de resumen. Solo movimientos individuales.`;
+  }
+
+  if(docType==='liqui'){
+    return base+`
+
+DOCUMENTO: Liquidación de sueldo chilena.
+
+Extrae SOLO el ingreso neto (lo que efectivamente se deposita). Si hay múltiples depósitos (quincena, etc.), extráelos por separado.
+- transaction_type: "income" para todos
+- category_slug: "other"
+- amount: POSITIVO (es un ingreso)
+- description_clean: "Sueldo [mes] [año]" o similar
+
+También puedes extraer descuentos importantes como AFP, salud, impuesto, si están detallados — estos serían "expense" con category_slug "other".`;
+  }
+
+  if(docType==='boleta'){
+    return base+`
+
+DOCUMENTO: Boleta o recibo de compra chileno (foto o PDF).
+
+Extrae UNA transacción con:
+- date: fecha de la boleta
+- description_clean: nombre del comercio/establecimiento
+- amount: NEGATIVO (es un gasto), monto total pagado
+- transaction_type: "expense"
+- category_slug: categoría apropiada según el tipo de comercio
+- description_raw: descripción completa como aparece en la boleta
+
+Si hay múltiples ítems, extrae solo el total como una transacción, no cada ítem por separado.`;
+  }
+
+  // Default: TC (tarjeta de crédito)
+  return base+`
+
+DOCUMENTO: Estado de cuenta de tarjeta de crédito chilena (${account?.bank||''} ${account?.name||''}, ${account?.currency||'CLP'}).
+
+REGLAS:
+- transaction_type: "expense" para todos los cargos/compras
+- transaction_type: "payment" para pagos a la tarjeta (keywords: "PAGO RECIBIDO", "ABONO", "PAGO CONTADO")
+- transaction_type: "fees" para intereses, comisiones, seguros
+- amount: NEGATIVO=gasto/cargo, POSITIVO=pago/abono
+- USD: monto en centavos (7.23→723)
+- category_slug: food, transport, shopping, health, entertainment, fitness, personal_care, utilities, housing, fees, loan_payment, payment, other, travel, donations, subscriptions, pets, education
+- NO incluyas totales, saldos ni resúmenes. Solo transacciones individuales.`;
 }
 
 // ── THEME ──
 function toggleTheme(){
-  const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+  const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',t);
-  document.getElementById('theme-btn').textContent = t==='dark'?'☀':'🌙';
+  document.getElementById('theme-btn').textContent=t==='dark'?'☀':'🌙';
 }
 
 // ── TOAST ──
 function toast(msg,err){
   const el=document.getElementById('toast');
-  el.textContent=msg; el.className='toast show'+(err?' err':'');
+  el.textContent=msg;el.className='toast show'+(err?' err':'');
   setTimeout(()=>el.classList.remove('show'),3000);
 }
 
 // ── NOTE CHIPS ──
-function appendNote(id, text){
+function appendNote(id,text){
   const el=document.getElementById(id);
-  if(el) el.value = (el.value ? el.value+' — '+text : text);
+  if(el) el.value=(el.value?el.value+' — '+text:text);
 }
 
 // ── MODE ──
 function setMode(m){
   mode=m;
-  document.getElementById('single-flow').style.display = m==='single'?'block':'none';
-  document.getElementById('bulk-flow').style.display = m==='bulk'?'block':'none';
+  document.getElementById('single-flow').style.display=m==='single'?'block':'none';
+  document.getElementById('bulk-flow').style.display=m==='bulk'?'block':'none';
   document.getElementById('mode-single-btn').classList.toggle('active',m==='single');
   document.getElementById('mode-bulk-btn').classList.toggle('active',m==='bulk');
   renderSteps();
 }
 
 // ── STEPS ──
-const SINGLE_STEPS = ['Archivo','Cuenta','Procesando','Revisar','Listo'];
-const BULK_STEPS = ['Archivos','Cuentas','Procesando','Revisar','Listo'];
-let currentStep = 1;
+const STEPS=['Archivo','Cuenta','Procesando','Revisar','Listo'];
+let currentStep=1;
 function renderSteps(step){
   if(step) currentStep=step;
-  const labels = mode==='single'?SINGLE_STEPS:BULK_STEPS;
-  document.getElementById('steps-wrap').innerHTML = labels.map((l,i)=>{
-    const n=i+1, cls = n===currentStep?'active':n<currentStep?'done':'';
-    return `<div class="step ${cls}"><div class="step-num">${n<currentStep?'✓':n}</div>${l}</div>${i<labels.length-1?'<div class="step-arr">›</div>':''}`;
+  document.getElementById('steps-wrap').innerHTML=STEPS.map((l,i)=>{
+    const n=i+1,cls=n===currentStep?'active':n<currentStep?'done':'';
+    return `<div class="step ${cls}"><div class="step-num">${n<currentStep?'✓':n}</div>${l}</div>${i<STEPS.length-1?'<div class="step-arr">›</div>':''}`;
   }).join('');
 }
 
 // ── DRIVE ──
+function getGoogleClientId(){return localStorage.getItem('goog_client_id')||DEFAULT_GOOGLE_CLIENT_ID;}
 function renderDriveStatus(containerId){
-  const clientId = getGoogleClientId();
-  const el = document.getElementById(containerId);
+  const clientId=getGoogleClientId();
+  const el=document.getElementById(containerId);
   if(!el) return;
-  el.innerHTML = `
+  el.innerHTML=`
     <div class="section-title">Google Drive <span style="color:var(--text3);font-size:9px">(backup opcional)</span></div>
     <div class="drive-box">
       <div class="d-dot ${driveToken?'on':clientId?'pending':''}" id="d-dot-${containerId}"></div>
-      <div class="d-text" id="d-text-${containerId}">${
-        driveToken ? 'Drive conectado ✓ — backup automático activado' :
-        clientId ? 'Client ID guardado — haz click en Conectar' :
-        'Sin configurar — el archivo no se subirá a Drive'
-      }</div>
-      ${driveToken ? 
-        `<button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="disconnectDrive()">Desconectar</button>` :
+      <div class="d-text" id="d-text-${containerId}">${driveToken?'Drive conectado ✓ — backup automático activado':clientId?'Client ID guardado — haz click en Conectar':'Sin configurar'}</div>
+      ${driveToken?
+        `<button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="disconnectDrive()">Desconectar</button>`:
         `<button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="showDriveSetup('${containerId}')">${clientId?'Conectar':'Configurar'}</button>`
       }
     </div>
     <div id="drive-setup-${containerId}" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.9rem;font-size:12px;margin-bottom:.8rem">
-      <p style="color:var(--text2);margin-bottom:7px">Ingresa tu Google OAuth Client ID:</p>
+      <p style="color:var(--text2);margin-bottom:7px">Google OAuth Client ID:</p>
       <input type="text" id="client-id-${containerId}" placeholder="xxxxxxxx.apps.googleusercontent.com" value="${clientId||''}" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 9px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;margin-bottom:7px;">
       <button class="btn btn-secondary" style="font-size:11px;padding:5px 10px" onclick="saveDriveId('${containerId}')">Guardar y conectar</button>
-      <p style="margin-top:7px;font-size:10px;color:var(--text3)">¿No tienes Client ID? Pregúntale a Claude — se configura en 5 min y funciona desde el teléfono también.</p>
     </div>`;
 }
-function showDriveSetup(cid){
-  const el=document.getElementById('drive-setup-'+cid);
-  if(el) el.style.display = el.style.display==='none'?'block':'none';
-}
-function saveDriveId(cid){
-  const val=document.getElementById('client-id-'+cid).value.trim();
-  if(!val) return;
-  localStorage.setItem('goog_client_id',val);
-  document.getElementById('drive-setup-'+cid).style.display='none';
-  connectDrive(cid);
-}
+function showDriveSetup(cid){const el=document.getElementById('drive-setup-'+cid);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function saveDriveId(cid){const val=document.getElementById('client-id-'+cid).value.trim();if(!val)return;localStorage.setItem('goog_client_id',val);document.getElementById('drive-setup-'+cid).style.display='none';connectDrive(cid);}
 function connectDrive(cid){
-  const clientId=getGoogleClientId();
-  if(!clientId) return;
+  const clientId=getGoogleClientId();if(!clientId)return;
   const dot=document.getElementById('d-dot-'+cid);
   const txt=document.getElementById('d-text-'+cid);
-  if(dot) dot.className='d-dot pending';
-  if(txt) txt.textContent='Conectando...';
-  if(!window.google){
-    const s=document.createElement('script');
-    s.src='https://accounts.google.com/gsi/client';
-    s.onload=()=>_driveAuth(clientId,cid);
-    document.head.appendChild(s);
-  } else { _driveAuth(clientId,cid); }
+  if(dot)dot.className='d-dot pending';if(txt)txt.textContent='Conectando...';
+  if(!window.google){const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=()=>_driveAuth(clientId,cid);document.head.appendChild(s);}
+  else{_driveAuth(clientId,cid);}
 }
 function _driveAuth(clientId,cid){
-  try {
-    google.accounts.oauth2.initTokenClient({
-      client_id:clientId,
-      scope:'https://www.googleapis.com/auth/drive.file',
-      callback:(r)=>{
-        if(r.error){ toast('Error Drive: '+r.error,true); return; }
-        driveToken=r.access_token;
-        const dot=document.getElementById('d-dot-'+cid);
-        const txt=document.getElementById('d-text-'+cid);
-        if(dot) dot.className='d-dot on';
-        if(txt) txt.textContent='Google Drive conectado ✓';
-        toast('Drive conectado ✓');
-      }
-    }).requestAccessToken({prompt:''});
-  } catch(e){ toast('Error iniciando Drive',true); }
+  try{
+    google.accounts.oauth2.initTokenClient({client_id:clientId,scope:'https://www.googleapis.com/auth/drive.file',callback:(r)=>{
+      if(r.error){toast('Error Drive: '+r.error,true);return;}
+      driveToken=r.access_token;
+      const dot=document.getElementById('d-dot-'+cid);const txt=document.getElementById('d-text-'+cid);
+      if(dot)dot.className='d-dot on';if(txt)txt.textContent='Google Drive conectado ✓';
+      toast('Drive conectado ✓');
+    }}).requestAccessToken({prompt:''});
+  }catch(e){toast('Error iniciando Drive',true);}
 }
-function disconnectDrive(){ driveToken=null; renderDriveStatus('s-drive-section'); }
+function disconnectDrive(){driveToken=null;renderDriveStatus('s-drive-section');}
 
-async function uploadToDrive(file, filename){
-  lastDriveError = null;
-  const baseToken = driveToken || await getFreshDriveToken();
-  if(!baseToken){
-    lastDriveError = 'No se pudo obtener token OAuth de Google Drive';
-    return null;
-  }
-  try {
-    const uploadWithToken = async (token) => {
-      const fRes=await fetch("https://www.googleapis.com/drive/v3/files?q=name='Fintrack CL' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)",{headers:{'Authorization':'Bearer '+token}});
+async function uploadToDrive(file,filename){
+  lastDriveError=null;
+  const token=driveToken||await getFreshDriveToken();
+  if(!token){lastDriveError='No token Drive';return null;}
+  try{
+    const tryUpload=async(tok)=>{
+      const fRes=await fetch("https://www.googleapis.com/drive/v3/files?q=name='Fintrack CL' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id)",{headers:{'Authorization':'Bearer '+tok}});
       const fData=await fRes.json();
-      if(!fRes.ok || fData.error) throw new Error(`folder_lookup: ${fData?.error?.message || fRes.status}`);
+      if(!fRes.ok||fData.error) throw new Error('folder_lookup: '+(fData?.error?.message||fRes.status));
       let folderId;
-      if(fData.files?.length>0){ folderId=fData.files[0].id; }
-      else {
-        const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({name:'Fintrack CL',mimeType:'application/vnd.google-apps.folder'})});
-        const crData=await cr.json();
-        if(!cr.ok || crData.error) throw new Error(`folder_create: ${crData?.error?.message || cr.status}`);
-        folderId=crData.id;
+      if(fData.files?.length>0){folderId=fData.files[0].id;}
+      else{
+        const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({name:'Fintrack CL',mimeType:'application/vnd.google-apps.folder'})});
+        const crD=await cr.json();if(!cr.ok||crD.error)throw new Error('folder_create');
+        folderId=crD.id;
       }
       const meta=JSON.stringify({name:filename,parents:[folderId]});
-      const form=new FormData();
-      form.append('metadata',new Blob([meta],{type:'application/json'}));
-      form.append('file',file);
-      const upRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+token},body:form});
-      const up=await upRes.json();
-      if(!upRes.ok || up.error) throw new Error(`file_upload: ${up?.error?.message || upRes.status}`);
-      return up.id ? {fileId:up.id,url:up.webViewLink} : null;
+      const form=new FormData();form.append('metadata',new Blob([meta],{type:'application/json'}));form.append('file',file);
+      const upRes=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,webViewLink',{method:'POST',headers:{'Authorization':'Bearer '+tok},body:form});
+      const up=await upRes.json();if(!upRes.ok||up.error)throw new Error('file_upload: '+(up?.error?.message||upRes.status));
+      return up.id?{fileId:up.id,url:up.webViewLink}:null;
     };
-
-    try {
-      return await uploadWithToken(baseToken);
-    } catch(e) {
-      if(String(e.message).includes('401') || String(e.message).toLowerCase().includes('invalid credentials')){
-        const freshToken = await getFreshDriveToken();
-        if(freshToken) return await uploadWithToken(freshToken);
+    try{return await tryUpload(token);}
+    catch(e){
+      if(String(e.message).includes('401')||String(e.message).toLowerCase().includes('invalid')){
+        const fresh=await getFreshDriveToken();if(fresh)return await tryUpload(fresh);
       }
       throw e;
     }
-  } catch(e){
-    lastDriveError = e.message || 'Error desconocido subiendo archivo a Drive';
-    console.error('Drive upload failed:',e);
-    return null;
-  }
+  }catch(e){lastDriveError=e.message||'Error desconocido';console.error('Drive upload failed:',e);return null;}
 }
-
 function getFreshDriveToken(){
-  return new Promise((resolve) => {
-    const clientId = getGoogleClientId();
-    if(!clientId || !window.google){ resolve(null); return; }
-    try {
-      google.accounts.oauth2.initTokenClient({
-        client_id: clientId,
-        scope: 'https://www.googleapis.com/auth/drive.file',
-        callback: (r) => {
-          if(r.error){ console.error('Drive token error:',r.error); resolve(null); return; }
-          driveToken = r.access_token;
-          resolve(r.access_token);
-        }
-      }).requestAccessToken({ prompt: '' });
-    } catch(e){ console.error('Drive auth error:',e); resolve(null); }
+  return new Promise((resolve)=>{
+    const clientId=getGoogleClientId();if(!clientId||!window.google){resolve(null);return;}
+    try{google.accounts.oauth2.initTokenClient({client_id:clientId,scope:'https://www.googleapis.com/auth/drive.file',callback:(r)=>{if(r.error){resolve(null);return;}driveToken=r.access_token;resolve(r.access_token);}}).requestAccessToken({prompt:''});}
+    catch(e){resolve(null);}
   });
 }
 
@@ -581,70 +653,58 @@ async function fileToBase64(file){
   return new Promise((res,rej)=>{
     const ext=file.name.split('.').pop().toLowerCase();
     let mt=file.type||'application/octet-stream';
-    if(ext==='heic'||ext==='heif') mt='image/heic';
-    if(ext==='xls') mt='application/vnd.ms-excel';
-    if(ext==='xlsx') mt='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    const r=new FileReader();
-    r.onload=e=>res({base64:e.target.result.split(',')[1],mediaType:mt});
-    r.onerror=rej;
-    r.readAsDataURL(file);
+    if(ext==='heic'||ext==='heif')mt='image/heic';
+    if(ext==='xls')mt='application/vnd.ms-excel';
+    if(ext==='xlsx')mt='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    const r=new FileReader();r.onload=e=>res({base64:e.target.result.split(',')[1],mediaType:mt});r.onerror=rej;r.readAsDataURL(file);
   });
 }
+
 async function callClaude(base64,mediaType,filename,account){
   const isImg=mediaType.startsWith('image/');
   const isPdf=mediaType==='application/pdf';
   const content=[];
-  const hint=`Estado de cuenta de ${account.bank} (${account.name}, ${account.currency}). Extrae TODAS las transacciones del período actual.`;
-  if(isImg){ content.push({type:'image',source:{type:'base64',media_type:mediaType,data:base64}}); content.push({type:'text',text:hint}); }
-  else if(isPdf){ content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}}); content.push({type:'text',text:hint}); }
-  else { content.push({type:'text',text:`Archivo: ${filename}. ${hint}. Datos: ${base64.slice(0,300)}...`}); }
+  const sys=getSystemPrompt(currentDocType,account);
 
-  const sys=`Eres un parser experto de estados de cuenta bancarios chilenos. Extrae TODAS las transacciones y devuelve SOLO JSON válido sin texto adicional:
-{"bank_detected":"string","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","transactions":[{"date":"YYYY-MM-DD","description_raw":"string","description_clean":"string sin sufijos","amount":-15000,"currency":"CLP","category_slug":"food"}]}
-Reglas: amount NEGATIVO=gasto, POSITIVO=pago/abono. USD en centavos (7.23→723). category_slug: food,transport,shopping,health,entertainment,fitness,personal_care,utilities,housing,fees,loan_payment,payment,other,travel,donations,subscriptions,pets,education. No incluyas totales ni subtotales.`;
+  if(isImg){content.push({type:'image',source:{type:'base64',media_type:mediaType,data:base64}});content.push({type:'text',text:`Archivo: ${filename}. Extrae todas las transacciones.`});}
+  else if(isPdf){content.push({type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}});content.push({type:'text',text:`Archivo: ${filename}. Extrae todas las transacciones.`});}
+  else{content.push({type:'text',text:`Archivo: ${filename}. Datos base64 (primeros 500 chars): ${base64.slice(0,500)}`});}
 
-  // Use Supabase Edge Function proxy to avoid CORS
-  const PROXY = `${SUPABASE_URL}/functions/v1/claude-proxy`;
-  const r = await fetch(PROXY, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'apikey': ANON_KEY },
-    body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:8000, system:sys, messages:[{role:'user',content}] })
-  });
-  if(!r.ok) throw new Error('Claude proxy error: ' + r.status + ' — ' + await r.text());
+  const PROXY=`${SUPABASE_URL}/functions/v1/claude-proxy`;
+  const r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON_KEY},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8000,system:sys,messages:[{role:'user',content}]})});
+  if(!r.ok) throw new Error('Claude proxy error: '+r.status+' — '+await r.text());
   const d=await r.json();
-  if(d.error) throw new Error('Claude error: ' + JSON.stringify(d.error));
+  if(d.error) throw new Error('Claude error: '+JSON.stringify(d.error));
   const txt=d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
   return JSON.parse(txt.replace(/```json|```/g,'').trim());
 }
+
 async function makeHash(date,desc,amount,accountId){
   const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(`${date}|${desc}|${amount}|${accountId}`));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,32);
 }
+
 async function insertToSupabase(txs,importMeta){
   const impRes=await fetch(`${SUPABASE_URL}/rest/v1/imports`,{method:'POST',headers:{...SB_H,'Prefer':'return=representation'},body:JSON.stringify({
-    account_id:importMeta.account_id,
-    source_file:importMeta.original_filename,
-    source_type:importMeta.source_type,
-    period_start:importMeta.period_start||null,
-    period_end:importMeta.period_end||null,
-    row_count:txs.length,
-    status:'processing',
-    bank_detected:importMeta.bank_detected,
-    original_filename:importMeta.original_filename,
-    standardized_filename:importMeta.standardized_filename,
-    drive_url:importMeta.drive_url||null,
-    drive_file_id:importMeta.drive_file_id||null,
-    user_note:importMeta.user_note||null,
+    account_id:importMeta.account_id,source_file:importMeta.original_filename,source_type:importMeta.source_type,
+    period_start:importMeta.period_start||null,period_end:importMeta.period_end||null,
+    row_count:txs.length,status:'processing',bank_detected:importMeta.bank_detected,
+    original_filename:importMeta.original_filename,standardized_filename:importMeta.standardized_filename,
+    drive_url:importMeta.drive_url||null,drive_file_id:importMeta.drive_file_id||null,user_note:importMeta.user_note||null,
   })});
   const impData=await impRes.json();
   const importId=Array.isArray(impData)?impData[0]?.id:impData?.id;
 
   const rows=await Promise.all(txs.map(async t=>({
     date:t.date,description_raw:t.description_raw,description_clean:t.description_clean,
-    amount:t.amount,currency:t.currency,category_slug:t.category_slug,
+    amount:t.amount,currency:t.currency||'CLP',category_slug:t.category_slug,
     account_id:importMeta.account_id,import_id:importId||null,
+    transaction_type:t.transaction_type||'expense',
+    counterpart_name:t.counterpart_name||null,
+    counterpart_bank:t.counterpart_bank||null,
+    bank_reference:t.bank_reference||null,
     hash:await makeHash(t.date,t.description_raw,t.amount,importMeta.account_id),
-    notes:[importMeta.user_note,importMeta.drive_url?`drive:${importMeta.drive_url}`:null].filter(Boolean).join(' | ')||''
+    notes:[importMeta.user_note,importMeta.drive_url?`drive:${importMeta.drive_url}`:null].filter(Boolean).join(' | ')||null
   })));
 
   let inserted=0,skipped=0;
@@ -656,101 +716,78 @@ async function insertToSupabase(txs,importMeta){
     else inserted+=batch.length;
   }
   if(importId) await fetch(`${SUPABASE_URL}/rest/v1/imports?id=eq.${importId}`,{method:'PATCH',headers:SB_H,body:JSON.stringify({status:'done',inserted_count:inserted,skipped_count:skipped})});
-  return {inserted,skipped,importId};
+  return{inserted,skipped,importId};
 }
+
 function stdName(file,account){
   const ext=file.name.split('.').pop().toLowerCase();
   const d=new Date().toISOString().slice(0,10);
-  return `fintrack_${account.bank.replace(/\s+/g,'_').toLowerCase()}_${account.name.replace(/\s+/g,'_').toLowerCase()}_${d}.${ext}`;
+  return`fintrack_${(account?.bank||'unknown').replace(/\s+/g,'_').toLowerCase()}_${(account?.name||'account').replace(/\s+/g,'_').toLowerCase()}_${d}.${ext}`;
 }
-function fileIcon(f){ const e=f.name.split('.').pop().toLowerCase(); return {pdf:'📄',xls:'📊',xlsx:'📊',jpg:'🖼',jpeg:'🖼',png:'🖼',heic:'🖼',heif:'🖼'}[e]||'📎'; }
+function fileIcon(f){const e=f.name.split('.').pop().toLowerCase();return{pdf:'📄',xls:'📊',xlsx:'📊',jpg:'🖼',jpeg:'🖼',png:'🖼',heic:'🖼',heif:'🖼'}[e]||'📎';}
+function txTypeLabel(type){return{expense:'gasto',transfer_out:'↑ saliente',transfer_in:'↓ entrante',income:'ingreso',payment:'pago tc',fees:'fee'}[type]||type;}
 
-// ════════════ SINGLE FLOW ════════════
+// ════ SINGLE FLOW ════
 const sZone=document.getElementById('s-upload-zone');
 sZone.addEventListener('dragover',e=>{e.preventDefault();sZone.classList.add('drag');});
 sZone.addEventListener('dragleave',()=>sZone.classList.remove('drag'));
 sZone.addEventListener('drop',e=>{e.preventDefault();sZone.classList.remove('drag');if(e.dataTransfer.files[0])sSingleFile(e.dataTransfer.files[0]);});
 
 function sSingleFile(file){
-  if(!file) return;
-  sFile=file;
+  if(!file)return;sFile=file;
   const sz=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+'MB':Math.round(file.size/1024)+'KB';
-  document.getElementById('s-file-preview').innerHTML=`
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;display:flex;align-items:center;gap:9px;">
-      <span style="font-size:1.3rem">${fileIcon(file)}</span>
-      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">${sz}</div></div>
-      <button onclick="sRemoveFile()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:3px">✕</button>
-    </div>`;
+  document.getElementById('s-file-preview').innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;display:flex;align-items:center;gap:9px;"><span style="font-size:1.3rem">${fileIcon(file)}</span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">${sz}</div></div><button onclick="sRemoveFile()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:3px">✕</button></div>`;
   document.getElementById('s-file-preview').style.display='block';
   document.getElementById('s-upload-zone').style.display='none';
   document.getElementById('s-btn-1').disabled=false;
 }
-function sRemoveFile(){
-  sFile=null;
-  document.getElementById('s-file-preview').style.display='none';
-  document.getElementById('s-upload-zone').style.display='block';
-  document.getElementById('s-btn-1').disabled=true;
-  document.getElementById('s-file-input').value='';
-}
-function sGoStep(n){ sGoPanel(n); renderSteps(n); }
+function sRemoveFile(){sFile=null;document.getElementById('s-file-preview').style.display='none';document.getElementById('s-upload-zone').style.display='block';document.getElementById('s-btn-1').disabled=true;document.getElementById('s-file-input').value='';}
+function sGoStep(n){sGoPanel(n);renderSteps(n);}
 function sGoPanel(n){
   document.querySelectorAll('#single-flow .panel').forEach((p,i)=>p.classList.toggle('active',i+1===n));
   window.scrollTo({top:0,behavior:'smooth'});
   if(n===2){
-    document.getElementById('s-acc-grid').innerHTML=ACCOUNTS.map(a=>`
-      <div class="acc-card" onclick="sSelectAcc('${a.id}')" id="sacc-${a.id}">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="acc-bank">${a.bank}</div><div class="acc-curr">${a.currency}</div></div>
-        <div class="acc-name">${a.name}</div>
-      </div>`).join('');
+    document.getElementById('s-acc-grid').innerHTML=ACCOUNTS.map(a=>`<div class="acc-card" onclick="sSelectAcc('${a.id}')" id="sacc-${a.id}"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="acc-bank">${a.bank}</div><div class="acc-curr">${a.currency}</div></div><div class="acc-name">${a.name}</div></div>`).join('');
   }
 }
-function sSelectAcc(id){
-  sAccount=ACCOUNTS.find(a=>a.id===id);
-  document.querySelectorAll('#s-acc-grid .acc-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('sacc-'+id).classList.add('selected');
-  document.getElementById('s-btn-2').disabled=false;
-}
-function sLog(msg,cls){ const b=document.getElementById('s-log'); b.innerHTML+=`<div class="${cls||'log-line'}">${msg}</div>`; b.scrollTop=b.scrollHeight; }
+function sSelectAcc(id){sAccount=ACCOUNTS.find(a=>a.id===id);document.querySelectorAll('#s-acc-grid .acc-card').forEach(c=>c.classList.remove('selected'));document.getElementById('sacc-'+id).classList.add('selected');document.getElementById('s-btn-2').disabled=false;}
+function sLog(msg,cls){const b=document.getElementById('s-log');b.innerHTML+=`<div class="${cls||'log-line'}">${msg}</div>`;b.scrollTop=b.scrollHeight;}
 
 async function sProcess(){
-  sGoPanel(3); renderSteps(3);
-  sTxs=[]; sMeta={};
-  try {
+  sGoPanel(3);renderSteps(3);sTxs=[];sMeta={};
+  try{
     const docNote=document.getElementById('s-doc-note').value.trim();
-    const dateStr=new Date().toISOString().slice(0,10);
     const sName=stdName(sFile,sAccount);
     let driveUrl=null,driveFileId=null;
-
     if(driveToken){
       sLog('📁 Subiendo a Google Drive...','log-info');
       document.getElementById('s-proc-title').textContent='Guardando en Drive...';
       const dr=await uploadToDrive(sFile,sName);
-      if(dr){ driveUrl=dr.url; driveFileId=dr.fileId; sLog('✓ Drive: '+sName,'log-ok'); }
-      else {
-        sLog('⚠ Drive falló — continuando','log-err');
-        if(lastDriveError) sLog('   ↳ '+lastDriveError,'log-err');
-      }
-    } else { sLog('ℹ Drive no configurado','log-line'); }
+      if(dr){driveUrl=dr.url;driveFileId=dr.fileId;sLog('✓ Drive: '+sName,'log-ok');}
+      else{sLog('⚠ Drive falló — continuando sin backup','log-err');if(lastDriveError)sLog('   ↳ '+lastDriveError,'log-err');}
+    }else{sLog('ℹ Drive no configurado','log-line');}
 
     sLog('📖 Leyendo archivo...','log-info');
     document.getElementById('s-proc-title').textContent='Leyendo documento...';
-    const {base64,mediaType}=await fileToBase64(sFile);
+    const{base64,mediaType}=await fileToBase64(sFile);
 
-    sLog('🤖 Claude está parseando...','log-info');
+    sLog('🤖 Claude parseando (tipo: '+currentDocType+')...','log-info');
     document.getElementById('s-proc-title').textContent='Claude está leyendo...';
     document.getElementById('s-proc-sub').textContent='Extrayendo transacciones';
 
     const parsed=await callClaude(base64,mediaType,sFile.name,sAccount);
-    const selectedAccountId = sAccount?.is_virtual ? null : sAccount?.id;
+    const selectedAccountId=sAccount?.is_virtual?null:sAccount?.id;
     sTxs=(parsed.transactions||[]).map((t,i)=>({...t,included:true,id_temp:'t'+i}));
     sMeta={account_id:selectedAccountId,original_filename:sFile.name,standardized_filename:sName,source_type:sFile.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:docNote};
 
     sLog(`✓ ${sTxs.length} transacciones extraídas`,'log-ok');
+    const types=[...new Set(sTxs.map(t=>t.transaction_type||'expense'))];
+    sLog(`  Tipos: ${types.join(', ')}`,'log-info');
     sLog(`  Banco: ${parsed.bank_detected||'?'} · ${parsed.period_start||'?'} → ${parsed.period_end||'?'}`,'log-line');
-    if(docNote) sLog(`  📝 Nota: "${docNote}"`,'log-line');
+    if(docNote)sLog(`  📝 Nota: "${docNote}"`,'log-line');
     document.getElementById('s-spinner').style.display='none';
-    setTimeout(()=>{ sRenderPreview(); sGoPanel(4); renderSteps(4); },600);
-  } catch(e){
+    setTimeout(()=>{sRenderPreview();sGoPanel(4);renderSteps(4);},600);
+  }catch(e){
     document.getElementById('s-spinner').style.display='none';
     document.getElementById('s-proc-title').textContent='Error';
     sLog('✕ '+e.message,'log-err');
@@ -760,111 +797,82 @@ async function sProcess(){
 
 function sRenderPreview(){
   const inc=sTxs.filter(t=>t.included);
-  const total=inc.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
-  document.getElementById('s-preview-stats').innerHTML=`<div class="p-stat"><span>${inc.length}</span> seleccionadas</div><div class="p-stat">$<span>${total.toLocaleString('es-CL')}</span> cargos</div>`;
-  document.getElementById('s-tbody').innerHTML=sTxs.map((t,i)=>`
-    <tr id="sr-${i}" class="${t.included?'':'excluded'}">
+  const charges=inc.filter(t=>Number(t.amount)<0).reduce((s,t)=>s+Math.abs(Number(t.amount)),0);
+  const credits=inc.filter(t=>Number(t.amount)>0).reduce((s,t)=>s+Number(t.amount),0);
+  document.getElementById('s-preview-stats').innerHTML=`<div class="p-stat"><span>${inc.length}</span> seleccionadas</div><div class="p-stat">Cargos: $<span>${charges.toLocaleString('es-CL')}</span></div>${credits?`<div class="p-stat">Abonos: $<span>${credits.toLocaleString('es-CL')}</span></div>`:''}`;
+  document.getElementById('s-tbody').innerHTML=sTxs.map((t,i)=>{
+    const txType=t.transaction_type||'expense';
+    return`<tr id="sr-${i}" class="${t.included?'':'excluded'}">
       <td><button class="row-tog" onclick="sTogRow(${i})">${t.included?'✕':'+'}</button></td>
       <td class="td-date">${t.date}</td>
-      <td><div class="td-desc" title="${t.description_clean||''}">${(t.description_clean||'').slice(0,38)}</div></td>
-      <td class="td-amt ${t.amount<0?'neg':'pos'}">${t.amount<0?'':'+'}$${Math.abs(t.amount).toLocaleString('es-CL')}</td>
+      <td><div class="td-desc" title="${t.description_clean||''}">${(t.description_clean||'').slice(0,36)}</div></td>
+      <td class="td-amt ${Number(t.amount)<0?'neg':'pos'}">${Number(t.amount)<0?'':'+'}$${Math.abs(Number(t.amount)).toLocaleString('es-CL')}</td>
+      <td><span class="td-type ${txType}">${txTypeLabel(txType)}</span></td>
       <td><select class="cat-sel" onchange="sTxs[${i}].category_slug=this.value">${CAT_OPTS.replace(`value="${t.category_slug}"`,`value="${t.category_slug}" selected`)}</select></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
-function sTogRow(i){ sTxs[i].included=!sTxs[i].included; sRenderPreview(); }
-function sSelectAll(v){ sTxs.forEach(t=>t.included=v); sRenderPreview(); }
+function sTogRow(i){sTxs[i].included=!sTxs[i].included;sRenderPreview();}
+function sSelectAll(v){sTxs.forEach(t=>t.included=v);sRenderPreview();}
 
 async function sConfirm(){
-  const btn=document.getElementById('s-btn-confirm');
-  btn.disabled=true; btn.textContent='Importando...';
+  const btn=document.getElementById('s-btn-confirm');btn.disabled=true;btn.textContent='Importando...';
   const toIns=sTxs.filter(t=>t.included);
-  if(!toIns.length){ toast('No hay transacciones seleccionadas',true); btn.disabled=false; btn.textContent='Importar a Supabase →'; return; }
-  try {
-    const {inserted,skipped}=await insertToSupabase(toIns,sMeta);
+  if(!toIns.length){toast('No hay transacciones seleccionadas',true);btn.disabled=false;btn.textContent='Importar a Supabase →';return;}
+  try{
+    const{inserted,skipped}=await insertToSupabase(toIns,sMeta);
+    const typeBreakdown=[...new Set(toIns.map(t=>t.transaction_type||'expense'))].map(type=>{
+      const count=toIns.filter(t=>(t.transaction_type||'expense')===type).length;
+      return`${count} ${txTypeLabel(type)}`;
+    }).join(' · ');
     document.getElementById('s-success-sub').textContent=`${inserted} nuevas · ${skipped} duplicadas omitidas`;
     document.getElementById('s-success-grid').innerHTML=`
       <div class="s-card"><div class="s-label">Insertadas</div><div class="s-val">${inserted}</div></div>
       <div class="s-card"><div class="s-label">Omitidas</div><div class="s-val">${skipped}</div></div>
-      <div class="s-card"><div class="s-label">Banco</div><div class="s-val" style="font-size:.95rem">${sAccount.bank}</div></div>`;
-    if(sMeta.drive_url){ const l=document.getElementById('s-drive-link'); l.href=sMeta.drive_url; l.style.display='inline-flex'; }
-    if(sMeta.user_note){ document.getElementById('s-success-sub').textContent+=` · 📝 "${sMeta.user_note}"`; }
-    sGoPanel(5); renderSteps(5);
-  } catch(e){ toast('Error: '+e.message,true); btn.disabled=false; btn.textContent='Importar a Supabase →'; }
+      <div class="s-card"><div class="s-label">Banco</div><div class="s-val" style="font-size:.9rem">${sAccount?.bank||'—'}</div></div>
+      <div class="s-card"><div class="s-label">Tipos</div><div class="s-val" style="font-size:.7rem;line-height:1.2">${typeBreakdown}</div></div>`;
+    if(sMeta.drive_url){const l=document.getElementById('s-drive-link');l.href=sMeta.drive_url;l.style.display='inline-flex';}
+    sGoPanel(5);renderSteps(5);
+  }catch(e){toast('Error: '+e.message,true);btn.disabled=false;btn.textContent='Importar a Supabase →';}
 }
-function resetSingle(){ sFile=null;sAccount=null;sTxs=[];sMeta={}; document.getElementById('s-file-input').value=''; document.getElementById('s-log').innerHTML=''; document.getElementById('s-spinner').style.display='block'; sRemoveFile(); document.getElementById('s-doc-note').value=''; sGoPanel(1); renderSteps(1); }
+function resetSingle(){sFile=null;sAccount=null;sTxs=[];sMeta={};document.getElementById('s-file-input').value='';document.getElementById('s-log').innerHTML='';document.getElementById('s-spinner').style.display='block';sRemoveFile();document.getElementById('s-doc-note').value='';sGoPanel(1);renderSteps(1);}
 
-// ════════════ BULK FLOW ════════════
+// ════ BULK FLOW ════
 const bZone=document.getElementById('b-upload-zone');
 bZone.addEventListener('dragover',e=>{e.preventDefault();bZone.classList.add('drag');});
 bZone.addEventListener('dragleave',()=>bZone.classList.remove('drag'));
 bZone.addEventListener('drop',e=>{e.preventDefault();bZone.classList.remove('drag');bAddFiles(e.dataTransfer.files);});
 
 function bAddFiles(files){
-  Array.from(files).forEach(f=>{
-    if(!bFiles.find(b=>b.file.name===f.name && b.file.size===f.size))
-      bFiles.push({file:f,note:'',account:null,txs:[],meta:{},status:'pending'});
-  });
-  bRenderQueue();
-  document.getElementById('b-btn-1').disabled=bFiles.length===0;
+  Array.from(files).forEach(f=>{if(!bFiles.find(b=>b.file.name===f.name&&b.file.size===f.size))bFiles.push({file:f,note:'',account:null,txs:[],meta:{},status:'pending'});});
+  bRenderQueue();document.getElementById('b-btn-1').disabled=bFiles.length===0;
 }
 function bRenderQueue(){
-  const q=document.getElementById('b-file-queue');
-  q.innerHTML=bFiles.map((b,i)=>{
+  document.getElementById('b-file-queue').innerHTML=bFiles.map((b,i)=>{
     const sz=b.file.size>1024*1024?(b.file.size/1024/1024).toFixed(1)+'MB':Math.round(b.file.size/1024)+'KB';
-    const isPdf=b.file.name.toLowerCase().endsWith('.pdf');
-    const isImg=['jpg','jpeg','png','heic','heif'].some(e=>b.file.name.toLowerCase().endsWith(e));
-    const canPreview=isPdf||isImg;
-    return `
-    <div class="file-item" id="bfi-${i}">
+    return`<div class="file-item" id="bfi-${i}">
       <div class="file-item-header">
         <span class="file-icon-sm">${fileIcon(b.file)}</span>
-        <div class="file-meta">
-          <div class="file-name">${b.file.name}</div>
-          <div class="file-size">${sz}</div>
-        </div>
+        <div class="file-meta"><div class="file-name">${b.file.name}</div><div class="file-size">${sz}</div></div>
         <span class="file-status ${b.status}" id="bst-${i}">${b.status==='pending'?'pendiente':b.status}</span>
         <button class="file-remove" onclick="bRemoveFile(${i})">✕</button>
       </div>
       <div class="file-note-wrap">
-        <div class="file-note-label">
-          📝 Nota
-          ${canPreview?`<button class="file-preview-btn" onclick="bTogglePreview(${i})">vista previa</button>`:''}
-        </div>
-        <textarea class="file-note-input" id="bnote-${i}" placeholder="Ej: La mitad la paga Felipe · Debo rendir · Viaje de trabajo..." oninput="bFiles[${i}].note=this.value">${b.note}</textarea>
+        <div class="file-note-label">📝 Nota</div>
+        <textarea class="file-note-input" id="bnote-${i}" placeholder="Ej: La mitad la paga Felipe · Debo rendir..." oninput="bFiles[${i}].note=this.value">${b.note}</textarea>
         <div class="note-examples" style="margin-top:5px">
           <span class="note-chip" onclick="bAppendNote(${i},'Debo rendir')">📋 Rendir</span>
           <span class="note-chip" onclick="bAppendNote(${i},'Pago compartido')">👥 Compartido</span>
           <span class="note-chip" onclick="bAppendNote(${i},'Reembolso empresa')">💼 Empresa</span>
-          <span class="note-chip" onclick="bAppendNote(${i},'En cuotas')">💳 Cuotas</span>
         </div>
       </div>
-      <div id="bprev-${i}" style="display:none" class="file-preview-wrap"></div>
     </div>`;
   }).join('');
 }
-function bAppendNote(i,text){ bFiles[i].note=(bFiles[i].note?bFiles[i].note+' — '+text:text); document.getElementById('bnote-'+i).value=bFiles[i].note; }
-function bRemoveFile(i){ bFiles.splice(i,1); bRenderQueue(); document.getElementById('b-btn-1').disabled=bFiles.length===0; }
-
-async function bTogglePreview(i){
-  const wrap=document.getElementById('bprev-'+i);
-  if(wrap.style.display==='block'){ wrap.style.display='none'; return; }
-  const f=bFiles[i].file;
-  const isPdf=f.name.toLowerCase().endsWith('.pdf');
-  const isImg=['jpg','jpeg','png','heic','heif'].some(e=>f.name.toLowerCase().endsWith(e));
-  if(!wrap.innerHTML){
-    const url=URL.createObjectURL(f);
-    if(isPdf) wrap.innerHTML=`<iframe src="${url}"></iframe>`;
-    else if(isImg) wrap.innerHTML=`<img src="${url}" alt="preview">`;
-  }
-  wrap.style.display='block';
-}
-
-function bGoStep(n){ bGoPanel(n); renderSteps(n); }
-function bGoPanel(n){
-  document.querySelectorAll('#bulk-flow .panel').forEach((p,i)=>p.classList.toggle('active',i+1===n));
-  window.scrollTo({top:0,behavior:'smooth'});
-  if(n===2) bRenderAssign();
-}
+function bAppendNote(i,text){bFiles[i].note=(bFiles[i].note?bFiles[i].note+' — '+text:text);document.getElementById('bnote-'+i).value=bFiles[i].note;}
+function bRemoveFile(i){bFiles.splice(i,1);bRenderQueue();document.getElementById('b-btn-1').disabled=bFiles.length===0;}
+function bGoStep(n){bGoPanel(n);renderSteps(n);}
+function bGoPanel(n){document.querySelectorAll('#bulk-flow .panel').forEach((p,i)=>p.classList.toggle('active',i+1===n));window.scrollTo({top:0,behavior:'smooth'});if(n===2)bRenderAssign();}
 function bRenderAssign(){
   document.getElementById('b-assign-list').innerHTML=bFiles.map((b,i)=>`
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:8px;">
@@ -874,17 +882,15 @@ function bRenderAssign(){
       </div>
       ${b.note?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-style:italic">📝 "${b.note}"</div>`:''}
       <select class="cat-sel" style="width:100%;max-width:none;font-size:12px;padding:7px 9px" onchange="bFiles[${i}].account=ACCOUNTS.find(a=>a.id===this.value);bCheckAllAssigned()" id="bacc-${i}">
-        <option value="">— Selecciona cuenta —</option>
-        ${ACC_OPTS}
+        <option value="">— Selecciona cuenta —</option>${ACC_OPTS}
       </select>
     </div>`).join('');
   document.getElementById('b-btn-2').disabled=true;
 }
-function bCheckAllAssigned(){ document.getElementById('b-btn-2').disabled=bFiles.some(b=>!b.account); }
+function bCheckAllAssigned(){document.getElementById('b-btn-2').disabled=bFiles.some(b=>!b.account);}
 
 async function bProcess(){
-  bGoPanel(3); renderSteps(3);
-  // Render progress bars
+  bGoPanel(3);renderSteps(3);
   document.getElementById('b-progress-list').innerHTML=bFiles.map((b,i)=>`
     <div class="bulk-file-row" id="bpr-${i}">
       <span>${fileIcon(b.file)}</span>
@@ -900,109 +906,82 @@ async function bProcess(){
     const stEl=document.getElementById('bst2-'+i);
     const barEl=document.getElementById('bbar-'+i);
     const cntEl=document.getElementById('bcnt-'+i);
-    stEl.className='file-status processing'; stEl.textContent='procesando';
+    stEl.className='file-status processing';stEl.textContent='procesando';
     document.getElementById('b-proc-title').textContent=`Procesando ${i+1}/${bFiles.length}...`;
     document.getElementById('b-proc-sub').textContent=b.file.name;
-    try {
+    try{
       barEl.style.width='30%';
-      const {base64,mediaType}=await fileToBase64(b.file);
+      const{base64,mediaType}=await fileToBase64(b.file);
       barEl.style.width='60%';
-      // Drive upload
       let driveUrl=null,driveFileId=null;
       const sName=stdName(b.file,b.account);
-      if(driveToken){
-        const dr=await uploadToDrive(b.file,sName);
-        if(dr){driveUrl=dr.url;driveFileId=dr.fileId;}
-        else if(lastDriveError){ console.warn('Drive fallback (bulk):', lastDriveError); }
-      }
+      if(driveToken){const dr=await uploadToDrive(b.file,sName);if(dr){driveUrl=dr.url;driveFileId=dr.fileId;}}
       barEl.style.width='80%';
       const parsed=await callClaude(base64,mediaType,b.file.name,b.account);
-      const selectedAccountId = b.account?.is_virtual ? null : b.account?.id;
+      const selectedAccountId=b.account?.is_virtual?null:b.account?.id;
       b.txs=(parsed.transactions||[]).map((t,j)=>({...t,included:true,id_temp:'b'+i+'t'+j}));
       b.meta={account_id:selectedAccountId,original_filename:b.file.name,standardized_filename:sName,source_type:b.file.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:b.note};
-      b.status='done';
-      barEl.style.width='100%'; barEl.style.background='var(--success)';
-      stEl.className='file-status done'; stEl.textContent='✓ '+b.txs.length;
-      cntEl.textContent=b.txs.length+' txs';
-      totalTxs+=b.txs.length;
-    } catch(e){
-      b.status='error';
-      stEl.className='file-status error'; stEl.textContent='error';
-      barEl.style.background='var(--danger)';
-      console.error('Error processing',b.file.name,e);
-    }
+      b.status='done';barEl.style.width='100%';barEl.style.background='var(--success)';
+      stEl.className='file-status done';stEl.textContent='✓ '+b.txs.length;
+      cntEl.textContent=b.txs.length+' txs';totalTxs+=b.txs.length;
+    }catch(e){b.status='error';stEl.className='file-status error';stEl.textContent='error';barEl.style.background='var(--danger)';console.error('Error',b.file.name,e);}
   }
   document.getElementById('b-spinner').style.display='none';
   document.getElementById('b-proc-title').textContent='¡Listo! '+totalTxs+' transacciones extraídas';
-  setTimeout(()=>{ bRenderPreviewAll(); bGoPanel(4); renderSteps(4); },800);
+  setTimeout(()=>{bRenderPreviewAll();bGoPanel(4);renderSteps(4);},800);
 }
 
 function bRenderPreviewAll(){
-  const acc=document.getElementById('b-preview-accordion');
-  acc.innerHTML=bFiles.filter(b=>b.status==='done').map((b,i)=>`
+  document.getElementById('b-preview-accordion').innerHTML=bFiles.filter(b=>b.status==='done').map((b,i)=>`
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">
       <div style="padding:.8rem 1rem;display:flex;align-items:center;gap:9px;cursor:pointer;border-bottom:1px solid var(--border)" onclick="bTogAcc(${i})">
         <span>${fileIcon(b.file)}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.file.name}</div>
-          ${b.note?`<div style="font-size:10px;color:var(--text3);margin-top:1px">📝 ${b.note}</div>`:''}
-        </div>
+        <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.file.name}</div>${b.note?`<div style="font-size:10px;color:var(--text3);margin-top:1px">📝 ${b.note}</div>`:''}</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent)">${b.txs.filter(t=>t.included).length} txs</div>
         <div id="bacc-arr-${i}" style="color:var(--text3);font-size:12px">▼</div>
       </div>
       <div id="bacc-body-${i}" style="display:none;padding:.8rem">
         <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
           <table style="width:100%;border-collapse:collapse;font-size:11px">
-            <thead><tr><th style="background:var(--surface2);padding:6px 8px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)"></th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Fecha</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Descripción</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Monto</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Categoría</th></tr></thead>
-            <tbody>${b.txs.map((t,j)=>`
-              <tr id="brow-${i}-${j}" class="${t.included?'':'excluded'}" style="border-top:1px solid var(--border)">
+            <thead><tr><th style="background:var(--surface2);padding:6px 8px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)"></th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Fecha</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Descripción</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Monto</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Tipo</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Cat</th></tr></thead>
+            <tbody>${b.txs.map((t,j)=>{
+              const txType=t.transaction_type||'expense';
+              return`<tr id="brow-${i}-${j}" class="${t.included?'':'excluded'}" style="border-top:1px solid var(--border)">
                 <td style="padding:5px 8px"><button class="row-tog" onclick="bTogRow(${i},${j})">${t.included?'✕':'+'}</button></td>
                 <td class="td-date" style="padding:5px 8px">${t.date}</td>
                 <td style="padding:5px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">${(t.description_clean||'').slice(0,35)}</td>
-                <td class="td-amt ${t.amount<0?'neg':'pos'}" style="padding:5px 8px">${t.amount<0?'':'+'}$${Math.abs(t.amount).toLocaleString('es-CL')}</td>
+                <td class="td-amt ${Number(t.amount)<0?'neg':'pos'}" style="padding:5px 8px">${Number(t.amount)<0?'':'+'}$${Math.abs(Number(t.amount)).toLocaleString('es-CL')}</td>
+                <td style="padding:5px 8px"><span class="td-type ${txType}">${txTypeLabel(txType)}</span></td>
                 <td style="padding:5px 8px"><select class="cat-sel" onchange="bFiles[${i}].txs[${j}].category_slug=this.value">${CAT_OPTS.replace(`value="${t.category_slug}"`,`value="${t.category_slug}" selected`)}</select></td>
-              </tr>`).join('')}
-            </tbody>
+              </tr>`;
+            }).join('')}</tbody>
           </table>
         </div>
       </div>
     </div>`).join('');
 }
-function bTogAcc(i){
-  const body=document.getElementById('bacc-body-'+i);
-  const arr=document.getElementById('bacc-arr-'+i);
-  const open=body.style.display==='block';
-  body.style.display=open?'none':'block';
-  arr.textContent=open?'▼':'▲';
-}
-function bTogRow(fi,ti){ bFiles[fi].txs[ti].included=!bFiles[fi].txs[ti].included; bRenderPreviewAll(); }
+function bTogAcc(i){const body=document.getElementById('bacc-body-'+i);const arr=document.getElementById('bacc-arr-'+i);const open=body.style.display==='block';body.style.display=open?'none':'block';arr.textContent=open?'▼':'▲';}
+function bTogRow(fi,ti){bFiles[fi].txs[ti].included=!bFiles[fi].txs[ti].included;bRenderPreviewAll();}
 
 async function bConfirmAll(){
-  const btn=document.getElementById('b-btn-confirm');
-  btn.disabled=true; btn.textContent='Importando...';
+  const btn=document.getElementById('b-btn-confirm');btn.disabled=true;btn.textContent='Importando...';
   let totalIns=0,totalSkip=0,totalFiles=0;
-  try {
+  try{
     for(const b of bFiles.filter(f=>f.status==='done')){
-      const toIns=b.txs.filter(t=>t.included);
-      if(!toIns.length) continue;
-      const {inserted,skipped}=await insertToSupabase(toIns,b.meta);
-      totalIns+=inserted; totalSkip+=skipped; totalFiles++;
+      const toIns=b.txs.filter(t=>t.included);if(!toIns.length)continue;
+      const{inserted,skipped}=await insertToSupabase(toIns,b.meta);
+      totalIns+=inserted;totalSkip+=skipped;totalFiles++;
     }
     document.getElementById('b-success-sub').textContent=`${totalIns} transacciones nuevas de ${totalFiles} archivos · ${totalSkip} duplicadas omitidas`;
-    document.getElementById('b-success-grid').innerHTML=`
-      <div class="s-card"><div class="s-label">Archivos</div><div class="s-val">${totalFiles}</div></div>
-      <div class="s-card"><div class="s-label">Insertadas</div><div class="s-val">${totalIns}</div></div>
-      <div class="s-card"><div class="s-label">Omitidas</div><div class="s-val">${totalSkip}</div></div>`;
-    bGoPanel(5); renderSteps(5);
-  } catch(e){ toast('Error: '+e.message,true); btn.disabled=false; btn.textContent='Importar todo →'; }
+    document.getElementById('b-success-grid').innerHTML=`<div class="s-card"><div class="s-label">Archivos</div><div class="s-val">${totalFiles}</div></div><div class="s-card"><div class="s-label">Insertadas</div><div class="s-val">${totalIns}</div></div><div class="s-card"><div class="s-label">Omitidas</div><div class="s-val">${totalSkip}</div></div>`;
+    bGoPanel(5);renderSteps(5);
+  }catch(e){toast('Error: '+e.message,true);btn.disabled=false;btn.textContent='Importar todo →';}
 }
-function resetBulk(){ bFiles=[]; bRenderQueue(); document.getElementById('b-file-input').value=''; document.getElementById('b-btn-1').disabled=true; bGoPanel(1); renderSteps(1); }
+function resetBulk(){bFiles=[];bRenderQueue();document.getElementById('b-file-input').value='';document.getElementById('b-btn-1').disabled=true;bGoPanel(1);renderSteps(1);}
 
 // ── INIT ──
-setMode('single');
-renderSteps(1);
-renderDriveStatus('s-drive-section');
-if(localStorage.getItem('goog_client_id')) connectDrive('s-drive-section');
+setMode('single');renderSteps(1);renderDriveStatus('s-drive-section');
+if(localStorage.getItem('goog_client_id'))connectDrive('s-drive-section');
 </script>
 </body>
 </html>
