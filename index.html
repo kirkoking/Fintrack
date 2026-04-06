@@ -409,17 +409,36 @@ const ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SB_H={'apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY,'Content-Type':'application/json'};
 
 const ACCOUNTS=[
-  {id:'0e1f70bf-013a-416d-b6fb-bc55ed30b9f1',bank:'Itaú',name:'TC Nacional',currency:'CLP'},
-  {id:'f5b382e4-4625-4b70-a890-ca44ace192fd',bank:'Scotiabank',name:'TC Nacional',currency:'CLP'},
-  {id:'9636953b-d4cb-4a4a-b193-76796cc9c51d',bank:'Banco de Chile',name:'TC Nacional',currency:'CLP'},
-  {id:'96d3b64c-f35c-4ae1-8460-5dadf1d009e5',bank:'Banco de Chile',name:'TC Internacional',currency:'USD'},
-  {id:'f30ac63e-b0e2-4b5f-ad62-fd7a7671ff0b',bank:'Tenpo',name:'TC Digital',currency:'CLP'},
-  {id:'b3428f73-ae68-48ce-820c-3dcae69d9873',bank:'CMR Falabella',name:'TC CMR',currency:'CLP'},
-  {id:'other-payment-method',bank:'Otro',name:'Otro medio de pago',currency:'—',is_virtual:true},
-  {id:'forgot-payment-method',bank:'No recuerdo',name:'No recuerdo el medio',currency:'—',is_virtual:true},
+  // Tarjetas de crédito
+  {id:'0e1f70bf-013a-416d-b6fb-bc55ed30b9f1',bank:'Itaú',name:'TC Nacional',currency:'CLP',type:'tc'},
+  {id:'f5b382e4-4625-4b70-a890-ca44ace192fd',bank:'Scotiabank',name:'TC Nacional',currency:'CLP',type:'tc'},
+  {id:'9636953b-d4cb-4a4a-b193-76796cc9c51d',bank:'Banco de Chile',name:'TC Nacional',currency:'CLP',type:'tc'},
+  {id:'96d3b64c-f35c-4ae1-8460-5dadf1d009e5',bank:'Banco de Chile',name:'TC Internacional',currency:'USD',type:'tc'},
+  {id:'f30ac63e-b0e2-4b5f-ad62-fd7a7671ff0b',bank:'Tenpo',name:'TC Digital',currency:'CLP',type:'tc'},
+  {id:'b3428f73-ae68-48ce-820c-3dcae69d9873',bank:'CMR Falabella',name:'TC CMR',currency:'CLP',type:'tc'},
+  // Cuentas corrientes / vista
+  {id:'cc-itau',bank:'Itaú',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
+  {id:'cc-scotiabank',bank:'Scotiabank',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
+  {id:'cc-bdc',bank:'Banco de Chile',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
+  {id:'cc-bci',bank:'BCI',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
+  {id:'cc-santander',bank:'Santander',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
+  {id:'cc-tenpo',bank:'Tenpo',name:'Cuenta Vista',currency:'CLP',type:'cta',is_virtual:true},
+  {id:'cc-mercadopago',bank:'Mercado Pago',name:'Cuenta',currency:'CLP',type:'cta',is_virtual:true},
+  // Genéricos
+  {id:'other-payment-method',bank:'Otro banco',name:'Otra cuenta',currency:'CLP',is_virtual:true,type:'any'},
+  {id:'forgot-payment-method',bank:'No recuerdo',name:'No recuerdo',currency:'—',is_virtual:true,type:'any'},
 ];
 const CATS={food:'Comida',transport:'Transporte',shopping:'Compras',health:'Salud',entertainment:'Entretención',fitness:'Fitness',personal_care:'Cuidado personal',utilities:'Servicios',housing:'Vivienda',fees:'Comisiones',loan_payment:'Cuota préstamo',payment:'Pago tarjeta',other:'Otro',travel:'Viajes',donations:'Donaciones',subscriptions:'Suscripciones',pets:'Mascotas',education:'Educación'};
 const CAT_OPTS=Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+function getAccountsForDocType(){
+  if(currentDocType==='tc') return ACCOUNTS.filter(a=>a.type==='tc'||a.type==='any');
+  if(currentDocType==='cta') return ACCOUNTS.filter(a=>a.type==='cta'||a.type==='any');
+  return ACCOUNTS; // boleta/liqui show all
+}
+function getStep2Title(){
+  const titles={tc:'¿A qué tarjeta de crédito pertenece?',cta:'¿De qué cuenta corriente / vista es esta cartola?',boleta:'¿Con qué método de pago fue esta boleta?',liqui:'¿A qué cuenta se deposita tu sueldo?'};
+  return titles[currentDocType]||'¿A qué cuenta pertenece?';
+}
 const ACC_OPTS=ACCOUNTS.map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('');
 const DEFAULT_GOOGLE_CLIENT_ID='278945344888-e64ht5tfpoeksk29n0dsha6fpstqjh14.apps.googleusercontent.com';
 
@@ -747,7 +766,9 @@ function sGoPanel(n){
   document.querySelectorAll('#single-flow .panel').forEach((p,i)=>p.classList.toggle('active',i+1===n));
   window.scrollTo({top:0,behavior:'smooth'});
   if(n===2){
-    document.getElementById('s-acc-grid').innerHTML=ACCOUNTS.map(a=>`<div class="acc-card" onclick="sSelectAcc('${a.id}')" id="sacc-${a.id}"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="acc-bank">${a.bank}</div><div class="acc-curr">${a.currency}</div></div><div class="acc-name">${a.name}</div></div>`).join('');
+    document.querySelector('#s-panel-2 .section-title').textContent=getStep2Title();
+    const filtered=getAccountsForDocType();
+    document.getElementById('s-acc-grid').innerHTML=filtered.map(a=>`<div class="acc-card" onclick="sSelectAcc('${a.id}')" id="sacc-${a.id}"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div class="acc-bank">${a.bank}</div><div class="acc-curr">${a.currency}</div></div><div class="acc-name">${a.name}</div></div>`).join('');
   }
 }
 function sSelectAcc(id){sAccount=ACCOUNTS.find(a=>a.id===id);document.querySelectorAll('#s-acc-grid .acc-card').forEach(c=>c.classList.remove('selected'));document.getElementById('sacc-'+id).classList.add('selected');document.getElementById('s-btn-2').disabled=false;}
@@ -882,7 +903,7 @@ function bRenderAssign(){
       </div>
       ${b.note?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-style:italic">📝 "${b.note}"</div>`:''}
       <select class="cat-sel" style="width:100%;max-width:none;font-size:12px;padding:7px 9px" onchange="bFiles[${i}].account=ACCOUNTS.find(a=>a.id===this.value);bCheckAllAssigned()" id="bacc-${i}">
-        <option value="">— Selecciona cuenta —</option>${ACC_OPTS}
+        <option value="">— ${getStep2Title()} —</option>${getAccountsForDocType().map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('')}
       </select>
     </div>`).join('');
   document.getElementById('b-btn-2').disabled=true;
