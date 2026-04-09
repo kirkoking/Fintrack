@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fintrack · Importar</title>
+<title>Fintrack Â· Importar</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root[data-theme="dark"]{
@@ -203,52 +203,52 @@ tbody td{padding:6px 9px;vertical-align:middle;}
 
 <header>
   <div>
-    <div class="logo-title">Fintrack · Importar</div>
-    <div class="logo-sub">Documentos → Supabase</div>
+    <div class="logo-title">Fintrack Â· Importar</div>
+    <div class="logo-sub">Documentos â Supabase</div>
   </div>
   <div style="display:flex;gap:7px">
-    <a href="fintrack.html" class="icon-btn" title="Dashboard">←</a>
-    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">☀</button>
+    <a href="fintrack.html" class="icon-btn" title="Dashboard">â</a>
+    <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">â</button>
   </div>
 </header>
 
 <main>
 
 <!-- DOC TYPE -->
-<div class="section-title">¿Qué vas a subir?</div>
+<div class="section-title">Â¿QuÃ© vas a subir?</div>
 <div class="doc-type-grid" id="doc-type-grid">
   <div class="doc-type-card selected" onclick="selectDocType('tc')" id="dt-tc">
-    <div class="doc-type-icon">💳</div>
-    <div class="doc-type-name">Tarjeta de crédito</div>
-    <div class="doc-type-desc">Estado de cuenta TC — Itaú, BdC, Tenpo, Scotiabank, CMR</div>
+    <div class="doc-type-icon">ð³</div>
+    <div class="doc-type-name">Tarjeta de crÃ©dito</div>
+    <div class="doc-type-desc">Estado de cuenta TC â ItaÃº, BdC, Tenpo, Scotiabank, CMR</div>
   </div>
   <div class="doc-type-card" onclick="selectDocType('cta')" id="dt-cta">
-    <div class="doc-type-icon">🏦</div>
+    <div class="doc-type-icon">ð¦</div>
     <div class="doc-type-name">Cuenta corriente / vista</div>
-    <div class="doc-type-desc">Cartola — incluye transferencias, abonos, sueldo</div>
+    <div class="doc-type-desc">Cartola â incluye transferencias, abonos, sueldo</div>
   </div>
   <div class="doc-type-card" onclick="selectDocType('boleta')" id="dt-boleta">
-    <div class="doc-type-icon">🧾</div>
+    <div class="doc-type-icon">ð§¾</div>
     <div class="doc-type-name">Boleta / recibo</div>
     <div class="doc-type-desc">Foto de boleta o ticket de compra</div>
   </div>
   <div class="doc-type-card" onclick="selectDocType('liqui')" id="dt-liqui">
-    <div class="doc-type-icon">📄</div>
-    <div class="doc-type-name">Liquidación de sueldo</div>
-    <div class="doc-type-desc">PDF de liquidación — extrae ingreso neto</div>
+    <div class="doc-type-icon">ð</div>
+    <div class="doc-type-name">LiquidaciÃ³n de sueldo</div>
+    <div class="doc-type-desc">PDF de liquidaciÃ³n â extrae ingreso neto</div>
   </div>
 </div>
 
 <!-- MODE TOGGLE -->
 <div class="mode-toggle">
-  <button class="mode-btn active" id="mode-single-btn" onclick="setMode('single')">📄 Un archivo</button>
-  <button class="mode-btn" id="mode-bulk-btn" onclick="setMode('bulk')">📦 Carga masiva</button>
+  <button class="mode-btn active" id="mode-single-btn" onclick="setMode('single')">ð Un archivo</button>
+  <button class="mode-btn" id="mode-bulk-btn" onclick="setMode('bulk')">ð¦ Carga masiva</button>
 </div>
 
 <!-- STEPS -->
 <div class="steps" id="steps-wrap"></div>
 
-<!-- ════ SINGLE FLOW ════ -->
+<!-- ââââ SINGLE FLOW ââââ -->
 <div id="single-flow">
 
   <!-- S1: UPLOAD -->
@@ -256,7 +256,7 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     <div class="section-title">Selecciona el archivo</div>
     <div class="upload-zone" id="s-upload-zone">
       <input type="file" id="s-file-input" accept=".pdf,.xls,.xlsx,.jpg,.jpeg,.png,.heic,.heif" onchange="sSingleFile(this.files[0])">
-      <div class="upload-icon">📄</div>
+      <div class="upload-icon">ð</div>
       <div class="upload-title">Arrastra o selecciona</div>
       <div class="upload-sub">PDF, XLS, XLSX, JPG, PNG, HEIC</div>
       <div class="fmt-pills"><span class="fmt">PDF</span><span class="fmt">XLS</span><span class="fmt">XLSX</span><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">HEIC</span></div>
@@ -265,28 +265,28 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     <div class="divider"></div>
     <div class="section-title">Nota del documento <span style="color:var(--text3);font-size:9px">(opcional)</span></div>
     <div class="note-field">
-      <textarea class="note-textarea" id="s-doc-note" placeholder="Ej: La mitad la paga Felipe. / Debo rendir estos gastos. / Compré el computador en cuotas..."></textarea>
+      <textarea class="note-textarea" id="s-doc-note" placeholder="Ej: La mitad la paga Felipe. / Debo rendir estos gastos. / ComprÃ© el computador en cuotas..."></textarea>
       <div class="note-examples">
-        <span class="note-chip" onclick="appendNote('s-doc-note','Debo rendir estos gastos')">📋 Debo rendir</span>
-        <span class="note-chip" onclick="appendNote('s-doc-note','La mitad la paga un tercero')">👥 Pago compartido</span>
-        <span class="note-chip" onclick="appendNote('s-doc-note','Me lo reembolsa mi empresa')">💼 Reembolso empresa</span>
-        <span class="note-chip" onclick="appendNote('s-doc-note','Compra en cuotas')">💳 En cuotas</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','Debo rendir estos gastos')">ð Debo rendir</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','La mitad la paga un tercero')">ð¥ Pago compartido</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','Me lo reembolsa mi empresa')">ð¼ Reembolso empresa</span>
+        <span class="note-chip" onclick="appendNote('s-doc-note','Compra en cuotas')">ð³ En cuotas</span>
       </div>
     </div>
     <div class="divider"></div>
     <div id="s-drive-section"></div>
     <div style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="sGoStep(2)" id="s-btn-1" disabled>Continuar →</button>
+      <button class="btn btn-primary" onclick="sGoStep(2)" id="s-btn-1" disabled>Continuar â</button>
     </div>
   </div>
 
   <!-- S2: ACCOUNT -->
   <div class="panel" id="s-panel-2">
-    <div class="section-title">¿A qué cuenta pertenece?</div>
+    <div class="section-title">Â¿A quÃ© cuenta pertenece?</div>
     <div class="account-grid" id="s-acc-grid"></div>
     <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn-secondary" onclick="sGoPanel(1)">← Volver</button>
-      <button class="btn btn-primary" onclick="sProcess()" id="s-btn-2" disabled>Procesar con Claude →</button>
+      <button class="btn btn-secondary" onclick="sGoPanel(1)">â Volver</button>
+      <button class="btn btn-primary" onclick="sProcess()" id="s-btn-2" disabled>Procesar con Claude â</button>
     </div>
   </div>
 
@@ -295,7 +295,7 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     <div class="proc-wrap">
       <div class="spinner" id="s-spinner"></div>
       <div class="proc-title" id="s-proc-title">Procesando...</div>
-      <div class="proc-sub" id="s-proc-sub">Claude está leyendo el documento</div>
+      <div class="proc-sub" id="s-proc-sub">Claude estÃ¡ leyendo el documento</div>
       <div class="log-box" id="s-log"></div>
     </div>
   </div>
@@ -314,48 +314,48 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th style="width:28px"></th><th>Fecha</th><th>Descripción</th><th>Monto</th><th>Tipo</th><th>Categoría</th></tr></thead>
+        <thead><tr><th style="width:28px"></th><th>Fecha</th><th>DescripciÃ³n</th><th>Monto</th><th>Tipo</th><th>CategorÃ­a</th></tr></thead>
         <tbody id="s-tbody"></tbody>
       </table>
     </div>
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="sGoPanel(2)">← Volver</button>
-      <button class="btn btn-primary" onclick="sConfirm()" id="s-btn-confirm">Importar a Supabase →</button>
+      <button class="btn btn-secondary" onclick="sGoPanel(2)">â Volver</button>
+      <button class="btn btn-primary" onclick="sConfirm()" id="s-btn-confirm">Importar a Supabase â</button>
     </div>
   </div>
 
   <!-- S5: SUCCESS -->
   <div class="panel" id="s-panel-5">
     <div class="success-wrap">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">¡Importado!</div>
+      <div class="success-icon">ð</div>
+      <div class="success-title">Â¡Importado!</div>
       <div class="success-sub" id="s-success-sub"></div>
       <div class="success-grid" id="s-success-grid"></div>
-      <a id="s-drive-link" href="#" target="_blank" class="drive-link" style="display:none">📁 Ver en Google Drive</a>
+      <a id="s-drive-link" href="#" target="_blank" class="drive-link" style="display:none">ð Ver en Google Drive</a>
       <div class="btn-row" style="justify-content:center">
         <button class="btn btn-secondary" onclick="resetSingle()">Importar otro</button>
-        <a href="fintrack.html" class="btn btn-primary">Ver Dashboard →</a>
+        <a href="fintrack.html" class="btn btn-primary">Ver Dashboard â</a>
       </div>
     </div>
   </div>
 
 </div>
 
-<!-- ════ BULK FLOW ════ -->
+<!-- ââââ BULK FLOW ââââ -->
 <div id="bulk-flow" style="display:none">
 
   <div class="panel active" id="b-panel-1">
     <div class="section-title">Agrega los archivos</div>
     <div class="upload-zone" id="b-upload-zone">
       <input type="file" id="b-file-input" accept=".pdf,.xls,.xlsx,.jpg,.jpeg,.png,.heic,.heif" multiple onchange="bAddFiles(this.files)">
-      <div class="upload-icon">📦</div>
-      <div class="upload-title">Arrastra múltiples archivos</div>
-      <div class="upload-sub">Se acumulan — puedes agregar de a poco</div>
+      <div class="upload-icon">ð¦</div>
+      <div class="upload-title">Arrastra mÃºltiples archivos</div>
+      <div class="upload-sub">Se acumulan â puedes agregar de a poco</div>
       <div class="fmt-pills"><span class="fmt">PDF</span><span class="fmt">XLS</span><span class="fmt">XLSX</span><span class="fmt">JPG</span><span class="fmt">PNG</span><span class="fmt">HEIC</span></div>
     </div>
     <div class="file-queue" id="b-file-queue"></div>
     <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="bGoStep(2)" id="b-btn-1" disabled>Continuar →</button>
+      <button class="btn btn-primary" onclick="bGoStep(2)" id="b-btn-1" disabled>Continuar â</button>
     </div>
   </div>
 
@@ -363,8 +363,8 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     <div class="section-title">Asigna cada archivo a una cuenta</div>
     <div id="b-assign-list"></div>
     <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn-secondary" onclick="bGoPanel(1)">← Volver</button>
-      <button class="btn btn-primary" onclick="bProcess()" id="b-btn-2" disabled>Procesar todos con Claude →</button>
+      <button class="btn btn-secondary" onclick="bGoPanel(1)">â Volver</button>
+      <button class="btn btn-primary" onclick="bProcess()" id="b-btn-2" disabled>Procesar todos con Claude â</button>
     </div>
   </div>
 
@@ -372,7 +372,7 @@ tbody td{padding:6px 9px;vertical-align:middle;}
     <div class="proc-wrap" style="padding:1.5rem 1rem">
       <div class="spinner" id="b-spinner"></div>
       <div class="proc-title" id="b-proc-title">Procesando archivos...</div>
-      <div class="proc-sub" id="b-proc-sub">Claude está leyendo uno por uno</div>
+      <div class="proc-sub" id="b-proc-sub">Claude estÃ¡ leyendo uno por uno</div>
     </div>
     <div class="bulk-progress" id="b-progress-list"></div>
   </div>
@@ -380,20 +380,20 @@ tbody td{padding:6px 9px;vertical-align:middle;}
   <div class="panel" id="b-panel-4">
     <div id="b-preview-accordion"></div>
     <div class="btn-row" style="margin-top:1rem">
-      <button class="btn btn-secondary" onclick="bGoPanel(2)">← Volver</button>
-      <button class="btn btn-primary" onclick="bConfirmAll()" id="b-btn-confirm">Importar todo →</button>
+      <button class="btn btn-secondary" onclick="bGoPanel(2)">â Volver</button>
+      <button class="btn btn-primary" onclick="bConfirmAll()" id="b-btn-confirm">Importar todo â</button>
     </div>
   </div>
 
   <div class="panel" id="b-panel-5">
     <div class="success-wrap">
-      <div class="success-icon">🎉</div>
-      <div class="success-title">¡Carga masiva completa!</div>
+      <div class="success-icon">ð</div>
+      <div class="success-title">Â¡Carga masiva completa!</div>
       <div class="success-sub" id="b-success-sub"></div>
       <div class="success-grid" id="b-success-grid"></div>
       <div class="btn-row" style="justify-content:center">
         <button class="btn btn-secondary" onclick="resetBulk()">Nueva carga</button>
-        <a href="fintrack.html" class="btn btn-primary">Ver Dashboard →</a>
+        <a href="fintrack.html" class="btn btn-primary">Ver Dashboard â</a>
       </div>
     </div>
   </div>
@@ -409,26 +409,26 @@ const ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const SB_H={'apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY,'Content-Type':'application/json'};
 
 const ACCOUNTS=[
-  // Tarjetas de crédito
-  {id:'0e1f70bf-013a-416d-b6fb-bc55ed30b9f1',bank:'Itaú',name:'TC Nacional',currency:'CLP',type:'tc'},
+  // Tarjetas de crÃ©dito
+  {id:'0e1f70bf-013a-416d-b6fb-bc55ed30b9f1',bank:'ItaÃº',name:'TC Nacional',currency:'CLP',type:'tc'},
   {id:'f5b382e4-4625-4b70-a890-ca44ace192fd',bank:'Scotiabank',name:'TC Nacional',currency:'CLP',type:'tc'},
   {id:'9636953b-d4cb-4a4a-b193-76796cc9c51d',bank:'Banco de Chile',name:'TC Nacional',currency:'CLP',type:'tc'},
   {id:'96d3b64c-f35c-4ae1-8460-5dadf1d009e5',bank:'Banco de Chile',name:'TC Internacional',currency:'USD',type:'tc'},
   {id:'f30ac63e-b0e2-4b5f-ad62-fd7a7671ff0b',bank:'Tenpo',name:'TC Digital',currency:'CLP',type:'tc'},
   {id:'b3428f73-ae68-48ce-820c-3dcae69d9873',bank:'CMR Falabella',name:'TC CMR',currency:'CLP',type:'tc'},
   // Cuentas corrientes / vista
-  {id:'cc-itau',bank:'Itaú',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
+  {id:'cc-itau',bank:'ItaÃº',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
   {id:'cc-scotiabank',bank:'Scotiabank',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
   {id:'cc-bdc',bank:'Banco de Chile',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
   {id:'cc-bci',bank:'BCI',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
   {id:'cc-santander',bank:'Santander',name:'Cuenta Corriente',currency:'CLP',type:'cta',is_virtual:true},
   {id:'cc-tenpo',bank:'Tenpo',name:'Cuenta Vista',currency:'CLP',type:'cta',is_virtual:true},
   {id:'cc-mercadopago',bank:'Mercado Pago',name:'Cuenta',currency:'CLP',type:'cta',is_virtual:true},
-  // Genéricos
+  // GenÃ©ricos
   {id:'other-payment-method',bank:'Otro banco',name:'Otra cuenta',currency:'CLP',is_virtual:true,type:'any'},
-  {id:'forgot-payment-method',bank:'No recuerdo',name:'No recuerdo',currency:'—',is_virtual:true,type:'any'},
+  {id:'forgot-payment-method',bank:'No recuerdo',name:'No recuerdo',currency:'â',is_virtual:true,type:'any'},
 ];
-const CATS={food:'Comida',transport:'Transporte',shopping:'Compras',health:'Salud',entertainment:'Entretención',fitness:'Fitness',personal_care:'Cuidado personal',utilities:'Servicios',housing:'Vivienda',fees:'Comisiones',loan_payment:'Cuota préstamo',payment:'Pago tarjeta',other:'Otro',travel:'Viajes',donations:'Donaciones',subscriptions:'Suscripciones',pets:'Mascotas',education:'Educación'};
+const CATS={food:'Comida',transport:'Transporte',shopping:'Compras',health:'Salud',entertainment:'EntretenciÃ³n',fitness:'Fitness',personal_care:'Cuidado personal',utilities:'Servicios',housing:'Vivienda',fees:'Comisiones',loan_payment:'Cuota prÃ©stamo',payment:'Pago tarjeta',other:'Otro',travel:'Viajes',donations:'Donaciones',subscriptions:'Suscripciones',pets:'Mascotas',education:'EducaciÃ³n'};
 const CAT_OPTS=Object.entries(CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
 function getAccountsForDocType(){
   if(currentDocType==='tc') return ACCOUNTS.filter(a=>a.type==='tc'||a.type==='any');
@@ -436,10 +436,10 @@ function getAccountsForDocType(){
   return ACCOUNTS; // boleta/liqui show all
 }
 function getStep2Title(){
-  const titles={tc:'¿A qué tarjeta de crédito pertenece?',cta:'¿De qué cuenta corriente / vista es esta cartola?',boleta:'¿Con qué método de pago fue esta boleta?',liqui:'¿A qué cuenta se deposita tu sueldo?'};
-  return titles[currentDocType]||'¿A qué cuenta pertenece?';
+  const titles={tc:'Â¿A quÃ© tarjeta de crÃ©dito pertenece?',cta:'Â¿De quÃ© cuenta corriente / vista es esta cartola?',boleta:'Â¿Con quÃ© mÃ©todo de pago fue esta boleta?',liqui:'Â¿A quÃ© cuenta se deposita tu sueldo?'};
+  return titles[currentDocType]||'Â¿A quÃ© cuenta pertenece?';
 }
-const ACC_OPTS=ACCOUNTS.map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('');
+const ACC_OPTS=ACCOUNTS.map(a=>`<option value="${a.id}">${a.bank} â ${a.name} (${a.currency})</option>`).join('');
 const DEFAULT_GOOGLE_CLIENT_ID='278945344888-e64ht5tfpoeksk29n0dsha6fpstqjh14.apps.googleusercontent.com';
 
 let mode='single',driveToken=null,lastDriveError=null;
@@ -447,16 +447,16 @@ let currentDocType='tc';
 let sFile=null,sAccount=null,sTxs=[],sMeta={};
 let bFiles=[];
 
-// ── DOC TYPE ──
+// ââ DOC TYPE ââ
 function selectDocType(type){
   currentDocType=type;
   document.querySelectorAll('.doc-type-card').forEach(c=>c.classList.remove('selected'));
   document.getElementById('dt-'+type).classList.add('selected');
 }
 
-// ── SYSTEM PROMPT BY DOC TYPE ──
+// ââ SYSTEM PROMPT BY DOC TYPE ââ
 function getSystemPrompt(docType, account){
-  const base=`Eres un parser experto de documentos financieros chilenos. Devuelve SOLO JSON válido, sin texto adicional ni markdown.
+  const base=`Eres un parser experto de documentos financieros chilenos. Devuelve SOLO JSON vÃ¡lido, sin texto adicional ni markdown.
 
 Schema de respuesta:
 {
@@ -482,33 +482,33 @@ Schema de respuesta:
 
 DOCUMENTO: Cartola de cuenta corriente o cuenta vista chilena.
 
-REGLAS CRÍTICAS para transaction_type:
+REGLAS CRÃTICAS para transaction_type:
 - "transfer_out": Transferencias enviadas a terceros. Keywords: "TRF A ", "TRANSF A ", "PAGO A ", "ENV A ", "TRANSFERENCIA ELECTRONICA A", nombres de personas/empresas recibiendo dinero.
 - "transfer_in": Abonos recibidos. Keywords: "ABONO", "DEP", "TRANSFERENCIA DE ", "TRANSF DE ", nombres enviando dinero, "REMUNERACION", "SUELDO", "HONORARIOS RECIBIDOS".
-- "income": Depósito de remuneración/sueldo, liquidación de sueldo, honorarios, pensiones, devoluciones de impuestos. Amount debe ser POSITIVO.
-- "expense": Compras con tarjeta de débito, pagos de servicios, ATM/giro de efectivo, comisiones, cargos.
-- "payment": Pago a tarjeta de crédito propia (keywords: "PAGO TC", "PAGO TARJETA").
+- "income": DepÃ³sito de remuneraciÃ³n/sueldo, liquidaciÃ³n de sueldo, honorarios, pensiones, devoluciones de impuestos. Amount debe ser POSITIVO.
+- "expense": Compras con tarjeta de dÃ©bito, pagos de servicios, ATM/giro de efectivo, comisiones, cargos.
+- "payment": Pago a tarjeta de crÃ©dito propia (keywords: "PAGO TC", "PAGO TARJETA").
 
 Para transfer_out y transfer_in, extrae counterpart_name (nombre del tercero) y counterpart_bank si aparece.
-Para bank_reference, extrae el número de operación o comprobante si existe.
+Para bank_reference, extrae el nÃºmero de operaciÃ³n o comprobante si existe.
 
 amount: NEGATIVO para salidas de dinero (gastos, transferencias enviadas, pagos). POSITIVO para entradas (abonos, transferencias recibidas, ingresos).
 
-NO incluyas saldos, totales ni líneas de resumen. Solo movimientos individuales.`;
+NO incluyas saldos, totales ni lÃ­neas de resumen. Solo movimientos individuales.`;
   }
 
   if(docType==='liqui'){
     return base+`
 
-DOCUMENTO: Liquidación de sueldo chilena.
+DOCUMENTO: LiquidaciÃ³n de sueldo chilena.
 
-Extrae SOLO el ingreso neto (lo que efectivamente se deposita). Si hay múltiples depósitos (quincena, etc.), extráelos por separado.
+Extrae SOLO el ingreso neto (lo que efectivamente se deposita). Si hay mÃºltiples depÃ³sitos (quincena, etc.), extrÃ¡elos por separado.
 - transaction_type: "income" para todos
 - category_slug: "other"
 - amount: POSITIVO (es un ingreso)
-- description_clean: "Sueldo [mes] [año]" o similar
+- description_clean: "Sueldo [mes] [aÃ±o]" o similar
 
-También puedes extraer descuentos importantes como AFP, salud, impuesto, si están detallados — estos serían "expense" con category_slug "other".`;
+TambiÃ©n puedes extraer descuentos importantes como AFP, salud, impuesto, si estÃ¡n detallados â estos serÃ­an "expense" con category_slug "other".`;
   }
 
   if(docType==='boleta'){
@@ -516,53 +516,53 @@ También puedes extraer descuentos importantes como AFP, salud, impuesto, si est
 
 DOCUMENTO: Boleta o recibo de compra chileno (foto o PDF).
 
-Extrae UNA transacción con:
+Extrae UNA transacciÃ³n con:
 - date: fecha de la boleta
 - description_clean: nombre del comercio/establecimiento
 - amount: NEGATIVO (es un gasto), monto total pagado
 - transaction_type: "expense"
-- category_slug: categoría apropiada según el tipo de comercio
-- description_raw: descripción completa como aparece en la boleta
+- category_slug: categorÃ­a apropiada segÃºn el tipo de comercio
+- description_raw: descripciÃ³n completa como aparece en la boleta
 
-Si hay múltiples ítems, extrae solo el total como una transacción, no cada ítem por separado.`;
+Si hay mÃºltiples Ã­tems, extrae solo el total como una transacciÃ³n, no cada Ã­tem por separado.`;
   }
 
-  // Default: TC (tarjeta de crédito)
+  // Default: TC (tarjeta de crÃ©dito)
   return base+`
 
-DOCUMENTO: Estado de cuenta de tarjeta de crédito chilena (${account?.bank||''} ${account?.name||''}, ${account?.currency||'CLP'}).
+DOCUMENTO: Estado de cuenta de tarjeta de crÃ©dito chilena (${account?.bank||''} ${account?.name||''}, ${account?.currency||'CLP'}).
 
 REGLAS:
 - transaction_type: "expense" para todos los cargos/compras
 - transaction_type: "payment" para pagos a la tarjeta (keywords: "PAGO RECIBIDO", "ABONO", "PAGO CONTADO")
 - transaction_type: "fees" para intereses, comisiones, seguros
 - amount: NEGATIVO=gasto/cargo, POSITIVO=pago/abono
-- USD: monto en centavos (7.23→723)
+- USD: monto en centavos (7.23â723)
 - category_slug: food, transport, shopping, health, entertainment, fitness, personal_care, utilities, housing, fees, loan_payment, payment, other, travel, donations, subscriptions, pets, education
-- NO incluyas totales, saldos ni resúmenes. Solo transacciones individuales.`;
+- NO incluyas totales, saldos ni resÃºmenes. Solo transacciones individuales.`;
 }
 
-// ── THEME ──
+// ââ THEME ââ
 function toggleTheme(){
   const t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
   document.documentElement.setAttribute('data-theme',t);
-  document.getElementById('theme-btn').textContent=t==='dark'?'☀':'🌙';
+  document.getElementById('theme-btn').textContent=t==='dark'?'â':'ð';
 }
 
-// ── TOAST ──
+// ââ TOAST ââ
 function toast(msg,err){
   const el=document.getElementById('toast');
   el.textContent=msg;el.className='toast show'+(err?' err':'');
   setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-// ── NOTE CHIPS ──
+// ââ NOTE CHIPS ââ
 function appendNote(id,text){
   const el=document.getElementById(id);
-  if(el) el.value=(el.value?el.value+' — '+text:text);
+  if(el) el.value=(el.value?el.value+' â '+text:text);
 }
 
-// ── MODE ──
+// ââ MODE ââ
 function setMode(m){
   mode=m;
   document.getElementById('single-flow').style.display=m==='single'?'block':'none';
@@ -572,18 +572,18 @@ function setMode(m){
   renderSteps();
 }
 
-// ── STEPS ──
+// ââ STEPS ââ
 const STEPS=['Archivo','Cuenta','Procesando','Revisar','Listo'];
 let currentStep=1;
 function renderSteps(step){
   if(step) currentStep=step;
   document.getElementById('steps-wrap').innerHTML=STEPS.map((l,i)=>{
     const n=i+1,cls=n===currentStep?'active':n<currentStep?'done':'';
-    return `<div class="step ${cls}"><div class="step-num">${n<currentStep?'✓':n}</div>${l}</div>${i<STEPS.length-1?'<div class="step-arr">›</div>':''}`;
+    return `<div class="step ${cls}"><div class="step-num">${n<currentStep?'â':n}</div>${l}</div>${i<STEPS.length-1?'<div class="step-arr">âº</div>':''}`;
   }).join('');
 }
 
-// ── DRIVE ──
+// ââ DRIVE ââ
 function getGoogleClientId(){return localStorage.getItem('goog_client_id')||DEFAULT_GOOGLE_CLIENT_ID;}
 function renderDriveStatus(containerId){
   const clientId=getGoogleClientId();
@@ -593,7 +593,7 @@ function renderDriveStatus(containerId){
     <div class="section-title">Google Drive <span style="color:var(--text3);font-size:9px">(backup opcional)</span></div>
     <div class="drive-box">
       <div class="d-dot ${driveToken?'on':clientId?'pending':''}" id="d-dot-${containerId}"></div>
-      <div class="d-text" id="d-text-${containerId}">${driveToken?'Drive conectado ✓ — backup automático activado':clientId?'Client ID guardado — haz click en Conectar':'Sin configurar'}</div>
+      <div class="d-text" id="d-text-${containerId}">${driveToken?'Drive conectado â â backup automÃ¡tico activado':clientId?'Client ID guardado â haz click en Conectar':'Sin configurar'}</div>
       ${driveToken?
         `<button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="disconnectDrive()">Desconectar</button>`:
         `<button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="showDriveSetup('${containerId}')">${clientId?'Conectar':'Configurar'}</button>`
@@ -621,8 +621,8 @@ function _driveAuth(clientId,cid){
       if(r.error){toast('Error Drive: '+r.error,true);return;}
       driveToken=r.access_token;
       const dot=document.getElementById('d-dot-'+cid);const txt=document.getElementById('d-text-'+cid);
-      if(dot)dot.className='d-dot on';if(txt)txt.textContent='Google Drive conectado ✓';
-      toast('Drive conectado ✓');
+      if(dot)dot.className='d-dot on';if(txt)txt.textContent='Google Drive conectado â';
+      toast('Drive conectado â');
     }}).requestAccessToken({prompt:''});
   }catch(e){toast('Error iniciando Drive',true);}
 }
@@ -667,7 +667,7 @@ function getFreshDriveToken(){
   });
 }
 
-// ── HELPERS ──
+// ââ HELPERS ââ
 async function fileToBase64(file){
   return new Promise((res,rej)=>{
     const ext=file.name.split('.').pop().toLowerCase();
@@ -691,7 +691,7 @@ async function callClaude(base64,mediaType,filename,account){
 
   const PROXY=`${SUPABASE_URL}/functions/v1/claude-proxy`;
   const r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json','apikey':ANON_KEY,'Authorization':'Bearer '+ANON_KEY},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:8000,system:sys,messages:[{role:'user',content}]})});
-  if(!r.ok) throw new Error('Claude proxy error: '+r.status+' — '+await r.text());
+  if(!r.ok) throw new Error('Claude proxy error: '+r.status+' â '+await r.text());
   const d=await r.json();
   if(d.error) throw new Error('Claude error: '+JSON.stringify(d.error));
   const txt=d.content.filter(b=>b.type==='text').map(b=>b.text).join('');
@@ -743,10 +743,10 @@ function stdName(file,account){
   const d=new Date().toISOString().slice(0,10);
   return`fintrack_${(account?.bank||'unknown').replace(/\s+/g,'_').toLowerCase()}_${(account?.name||'account').replace(/\s+/g,'_').toLowerCase()}_${d}.${ext}`;
 }
-function fileIcon(f){const e=f.name.split('.').pop().toLowerCase();return{pdf:'📄',xls:'📊',xlsx:'📊',jpg:'🖼',jpeg:'🖼',png:'🖼',heic:'🖼',heif:'🖼'}[e]||'📎';}
-function txTypeLabel(type){return{expense:'gasto',transfer_out:'↑ saliente',transfer_in:'↓ entrante',income:'ingreso',payment:'pago tc',fees:'fee'}[type]||type;}
+function fileIcon(f){const e=f.name.split('.').pop().toLowerCase();return{pdf:'ð',xls:'ð',xlsx:'ð',jpg:'ð¼',jpeg:'ð¼',png:'ð¼',heic:'ð¼',heif:'ð¼'}[e]||'ð';}
+function txTypeLabel(type){return{expense:'gasto',transfer_out:'â saliente',transfer_in:'â entrante',income:'ingreso',payment:'pago tc',fees:'fee'}[type]||type;}
 
-// ════ SINGLE FLOW ════
+// ââââ SINGLE FLOW ââââ
 const sZone=document.getElementById('s-upload-zone');
 sZone.addEventListener('dragover',e=>{e.preventDefault();sZone.classList.add('drag');});
 sZone.addEventListener('dragleave',()=>sZone.classList.remove('drag'));
@@ -755,7 +755,7 @@ sZone.addEventListener('drop',e=>{e.preventDefault();sZone.classList.remove('dra
 function sSingleFile(file){
   if(!file)return;sFile=file;
   const sz=file.size>1024*1024?(file.size/1024/1024).toFixed(1)+'MB':Math.round(file.size/1024)+'KB';
-  document.getElementById('s-file-preview').innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;display:flex;align-items:center;gap:9px;"><span style="font-size:1.3rem">${fileIcon(file)}</span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">${sz}</div></div><button onclick="sRemoveFile()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:3px">✕</button></div>`;
+  document.getElementById('s-file-preview').innerHTML=`<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;display:flex;align-items:center;gap:9px;"><span style="font-size:1.3rem">${fileIcon(file)}</span><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${file.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)">${sz}</div></div><button onclick="sRemoveFile()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:3px">â</button></div>`;
   document.getElementById('s-file-preview').style.display='block';
   document.getElementById('s-upload-zone').style.display='none';
   document.getElementById('s-btn-1').disabled=false;
@@ -781,19 +781,19 @@ async function sProcess(){
     const sName=stdName(sFile,sAccount);
     let driveUrl=null,driveFileId=null;
     if(driveToken){
-      sLog('📁 Subiendo a Google Drive...','log-info');
+      sLog('ð Subiendo a Google Drive...','log-info');
       document.getElementById('s-proc-title').textContent='Guardando en Drive...';
       const dr=await uploadToDrive(sFile,sName);
-      if(dr){driveUrl=dr.url;driveFileId=dr.fileId;sLog('✓ Drive: '+sName,'log-ok');}
-      else{sLog('⚠ Drive falló — continuando sin backup','log-err');if(lastDriveError)sLog('   ↳ '+lastDriveError,'log-err');}
-    }else{sLog('ℹ Drive no configurado','log-line');}
+      if(dr){driveUrl=dr.url;driveFileId=dr.fileId;sLog('â Drive: '+sName,'log-ok');}
+      else{sLog('â  Drive fallÃ³ â continuando sin backup','log-err');if(lastDriveError)sLog('   â³ '+lastDriveError,'log-err');}
+    }else{sLog('â¹ Drive no configurado','log-line');}
 
-    sLog('📖 Leyendo archivo...','log-info');
+    sLog('ð Leyendo archivo...','log-info');
     document.getElementById('s-proc-title').textContent='Leyendo documento...';
     const{base64,mediaType}=await fileToBase64(sFile);
 
-    sLog('🤖 Claude parseando (tipo: '+currentDocType+')...','log-info');
-    document.getElementById('s-proc-title').textContent='Claude está leyendo...';
+    sLog('ð¤ Claude parseando (tipo: '+currentDocType+')...','log-info');
+    document.getElementById('s-proc-title').textContent='Claude estÃ¡ leyendo...';
     document.getElementById('s-proc-sub').textContent='Extrayendo transacciones';
 
     const parsed=await callClaude(base64,mediaType,sFile.name,sAccount);
@@ -801,17 +801,17 @@ async function sProcess(){
     sTxs=(parsed.transactions||[]).map((t,i)=>({...t,included:true,id_temp:'t'+i}));
     sMeta={account_id:selectedAccountId,original_filename:sFile.name,standardized_filename:sName,source_type:sFile.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:docNote};
 
-    sLog(`✓ ${sTxs.length} transacciones extraídas`,'log-ok');
+    sLog(`â ${sTxs.length} transacciones extraÃ­das`,'log-ok');
     const types=[...new Set(sTxs.map(t=>t.transaction_type||'expense'))];
     sLog(`  Tipos: ${types.join(', ')}`,'log-info');
-    sLog(`  Banco: ${parsed.bank_detected||'?'} · ${parsed.period_start||'?'} → ${parsed.period_end||'?'}`,'log-line');
-    if(docNote)sLog(`  📝 Nota: "${docNote}"`,'log-line');
+    sLog(`  Banco: ${parsed.bank_detected||'?'} Â· ${parsed.period_start||'?'} â ${parsed.period_end||'?'}`,'log-line');
+    if(docNote)sLog(`  ð Nota: "${docNote}"`,'log-line');
     document.getElementById('s-spinner').style.display='none';
     setTimeout(()=>{sRenderPreview();sGoPanel(4);renderSteps(4);},600);
   }catch(e){
     document.getElementById('s-spinner').style.display='none';
     document.getElementById('s-proc-title').textContent='Error';
-    sLog('✕ '+e.message,'log-err');
+    sLog('â '+e.message,'log-err');
     console.error(e);
   }
 }
@@ -824,7 +824,7 @@ function sRenderPreview(){
   document.getElementById('s-tbody').innerHTML=sTxs.map((t,i)=>{
     const txType=t.transaction_type||'expense';
     return`<tr id="sr-${i}" class="${t.included?'':'excluded'}">
-      <td><button class="row-tog" onclick="sTogRow(${i})">${t.included?'✕':'+'}</button></td>
+      <td><button class="row-tog" onclick="sTogRow(${i})">${t.included?'â':'+'}</button></td>
       <td class="td-date">${t.date}</td>
       <td><div class="td-desc" title="${t.description_clean||''}">${(t.description_clean||'').slice(0,36)}</div></td>
       <td class="td-amt ${Number(t.amount)<0?'neg':'pos'}">${Number(t.amount)<0?'':'+'}$${Math.abs(Number(t.amount)).toLocaleString('es-CL')}</td>
@@ -839,26 +839,26 @@ function sSelectAll(v){sTxs.forEach(t=>t.included=v);sRenderPreview();}
 async function sConfirm(){
   const btn=document.getElementById('s-btn-confirm');btn.disabled=true;btn.textContent='Importando...';
   const toIns=sTxs.filter(t=>t.included);
-  if(!toIns.length){toast('No hay transacciones seleccionadas',true);btn.disabled=false;btn.textContent='Importar a Supabase →';return;}
+  if(!toIns.length){toast('No hay transacciones seleccionadas',true);btn.disabled=false;btn.textContent='Importar a Supabase â';return;}
   try{
     const{inserted,skipped}=await insertToSupabase(toIns,sMeta);
     const typeBreakdown=[...new Set(toIns.map(t=>t.transaction_type||'expense'))].map(type=>{
       const count=toIns.filter(t=>(t.transaction_type||'expense')===type).length;
       return`${count} ${txTypeLabel(type)}`;
-    }).join(' · ');
-    document.getElementById('s-success-sub').textContent=`${inserted} nuevas · ${skipped} duplicadas omitidas`;
+    }).join(' Â· ');
+    document.getElementById('s-success-sub').textContent=`${inserted} nuevas Â· ${skipped} duplicadas omitidas`;
     document.getElementById('s-success-grid').innerHTML=`
       <div class="s-card"><div class="s-label">Insertadas</div><div class="s-val">${inserted}</div></div>
       <div class="s-card"><div class="s-label">Omitidas</div><div class="s-val">${skipped}</div></div>
-      <div class="s-card"><div class="s-label">Banco</div><div class="s-val" style="font-size:.9rem">${sAccount?.bank||'—'}</div></div>
+      <div class="s-card"><div class="s-label">Banco</div><div class="s-val" style="font-size:.9rem">${sAccount?.bank||'â'}</div></div>
       <div class="s-card"><div class="s-label">Tipos</div><div class="s-val" style="font-size:.7rem;line-height:1.2">${typeBreakdown}</div></div>`;
     if(sMeta.drive_url){const l=document.getElementById('s-drive-link');l.href=sMeta.drive_url;l.style.display='inline-flex';}
     sGoPanel(5);renderSteps(5);
-  }catch(e){toast('Error: '+e.message,true);btn.disabled=false;btn.textContent='Importar a Supabase →';}
+  }catch(e){toast('Error: '+e.message,true);btn.disabled=false;btn.textContent='Importar a Supabase â';}
 }
 function resetSingle(){sFile=null;sAccount=null;sTxs=[];sMeta={};document.getElementById('s-file-input').value='';document.getElementById('s-log').innerHTML='';document.getElementById('s-spinner').style.display='block';sRemoveFile();document.getElementById('s-doc-note').value='';sGoPanel(1);renderSteps(1);}
 
-// ════ BULK FLOW ════
+// ââââ BULK FLOW ââââ
 const bZone=document.getElementById('b-upload-zone');
 bZone.addEventListener('dragover',e=>{e.preventDefault();bZone.classList.add('drag');});
 bZone.addEventListener('dragleave',()=>bZone.classList.remove('drag'));
@@ -876,21 +876,21 @@ function bRenderQueue(){
         <span class="file-icon-sm">${fileIcon(b.file)}</span>
         <div class="file-meta"><div class="file-name">${b.file.name}</div><div class="file-size">${sz}</div></div>
         <span class="file-status ${b.status}" id="bst-${i}">${b.status==='pending'?'pendiente':b.status}</span>
-        <button class="file-remove" onclick="bRemoveFile(${i})">✕</button>
+        <button class="file-remove" onclick="bRemoveFile(${i})">â</button>
       </div>
       <div class="file-note-wrap">
-        <div class="file-note-label">📝 Nota</div>
-        <textarea class="file-note-input" id="bnote-${i}" placeholder="Ej: La mitad la paga Felipe · Debo rendir..." oninput="bFiles[${i}].note=this.value">${b.note}</textarea>
+        <div class="file-note-label">ð Nota</div>
+        <textarea class="file-note-input" id="bnote-${i}" placeholder="Ej: La mitad la paga Felipe Â· Debo rendir..." oninput="bFiles[${i}].note=this.value">${b.note}</textarea>
         <div class="note-examples" style="margin-top:5px">
-          <span class="note-chip" onclick="bAppendNote(${i},'Debo rendir')">📋 Rendir</span>
-          <span class="note-chip" onclick="bAppendNote(${i},'Pago compartido')">👥 Compartido</span>
-          <span class="note-chip" onclick="bAppendNote(${i},'Reembolso empresa')">💼 Empresa</span>
+          <span class="note-chip" onclick="bAppendNote(${i},'Debo rendir')">ð Rendir</span>
+          <span class="note-chip" onclick="bAppendNote(${i},'Pago compartido')">ð¥ Compartido</span>
+          <span class="note-chip" onclick="bAppendNote(${i},'Reembolso empresa')">ð¼ Empresa</span>
         </div>
       </div>
     </div>`;
   }).join('');
 }
-function bAppendNote(i,text){bFiles[i].note=(bFiles[i].note?bFiles[i].note+' — '+text:text);document.getElementById('bnote-'+i).value=bFiles[i].note;}
+function bAppendNote(i,text){bFiles[i].note=(bFiles[i].note?bFiles[i].note+' â '+text:text);document.getElementById('bnote-'+i).value=bFiles[i].note;}
 function bRemoveFile(i){bFiles.splice(i,1);bRenderQueue();document.getElementById('b-btn-1').disabled=bFiles.length===0;}
 function bGoStep(n){bGoPanel(n);renderSteps(n);}
 function bGoPanel(n){document.querySelectorAll('#bulk-flow .panel').forEach((p,i)=>p.classList.toggle('active',i+1===n));window.scrollTo({top:0,behavior:'smooth'});if(n===2)bRenderAssign();}
@@ -901,9 +901,9 @@ function bRenderAssign(){
         <span>${fileIcon(b.file)}</span>
         <div style="font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.file.name}</div>
       </div>
-      ${b.note?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-style:italic">📝 "${b.note}"</div>`:''}
+      ${b.note?`<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-style:italic">ð "${b.note}"</div>`:''}
       <select class="cat-sel" style="width:100%;max-width:none;font-size:12px;padding:7px 9px" onchange="bFiles[${i}].account=ACCOUNTS.find(a=>a.id===this.value);bCheckAllAssigned()" id="bacc-${i}">
-        <option value="">— ${getStep2Title()} —</option>${getAccountsForDocType().map(a=>`<option value="${a.id}">${a.bank} — ${a.name} (${a.currency})</option>`).join('')}
+        <option value="">â ${getStep2Title()} â</option>${getAccountsForDocType().map(a=>`<option value="${a.id}">${a.bank} â ${a.name} (${a.currency})</option>`).join('')}
       </select>
     </div>`).join('');
   document.getElementById('b-btn-2').disabled=true;
@@ -917,7 +917,7 @@ async function bProcess(){
       <span>${fileIcon(b.file)}</span>
       <div class="bulk-file-name">${b.file.name}</div>
       <div class="bulk-bar-wrap"><div class="bulk-bar-bg"><div class="bulk-bar-fill" id="bbar-${i}" style="width:0%"></div></div></div>
-      <div class="bulk-count" id="bcnt-${i}">—</div>
+      <div class="bulk-count" id="bcnt-${i}">â</div>
       <span class="file-status pending" id="bst2-${i}">pendiente</span>
     </div>`).join('');
 
@@ -943,12 +943,12 @@ async function bProcess(){
       b.txs=(parsed.transactions||[]).map((t,j)=>({...t,included:true,id_temp:'b'+i+'t'+j}));
       b.meta={account_id:selectedAccountId,original_filename:b.file.name,standardized_filename:sName,source_type:b.file.name.split('.').pop().toLowerCase(),bank_detected:parsed.bank_detected,period_start:parsed.period_start,period_end:parsed.period_end,drive_url:driveUrl,drive_file_id:driveFileId,user_note:b.note};
       b.status='done';barEl.style.width='100%';barEl.style.background='var(--success)';
-      stEl.className='file-status done';stEl.textContent='✓ '+b.txs.length;
+      stEl.className='file-status done';stEl.textContent='â '+b.txs.length;
       cntEl.textContent=b.txs.length+' txs';totalTxs+=b.txs.length;
     }catch(e){b.status='error';stEl.className='file-status error';stEl.textContent='error';barEl.style.background='var(--danger)';console.error('Error',b.file.name,e);}
   }
   document.getElementById('b-spinner').style.display='none';
-  document.getElementById('b-proc-title').textContent='¡Listo! '+totalTxs+' transacciones extraídas';
+  document.getElementById('b-proc-title').textContent='Â¡Listo! '+totalTxs+' transacciones extraÃ­das';
   setTimeout(()=>{bRenderPreviewAll();bGoPanel(4);renderSteps(4);},800);
 }
 
@@ -957,18 +957,18 @@ function bRenderPreviewAll(){
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden">
       <div style="padding:.8rem 1rem;display:flex;align-items:center;gap:9px;cursor:pointer;border-bottom:1px solid var(--border)" onclick="bTogAcc(${i})">
         <span>${fileIcon(b.file)}</span>
-        <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.file.name}</div>${b.note?`<div style="font-size:10px;color:var(--text3);margin-top:1px">📝 ${b.note}</div>`:''}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.file.name}</div>${b.note?`<div style="font-size:10px;color:var(--text3);margin-top:1px">ð ${b.note}</div>`:''}</div>
         <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent)">${b.txs.filter(t=>t.included).length} txs</div>
-        <div id="bacc-arr-${i}" style="color:var(--text3);font-size:12px">▼</div>
+        <div id="bacc-arr-${i}" style="color:var(--text3);font-size:12px">â¼</div>
       </div>
       <div id="bacc-body-${i}" style="display:none;padding:.8rem">
         <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
           <table style="width:100%;border-collapse:collapse;font-size:11px">
-            <thead><tr><th style="background:var(--surface2);padding:6px 8px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)"></th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Fecha</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Descripción</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Monto</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Tipo</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Cat</th></tr></thead>
+            <thead><tr><th style="background:var(--surface2);padding:6px 8px;text-align:left;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)"></th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Fecha</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">DescripciÃ³n</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Monto</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Tipo</th><th style="background:var(--surface2);padding:6px 8px;text-align:left">Cat</th></tr></thead>
             <tbody>${b.txs.map((t,j)=>{
               const txType=t.transaction_type||'expense';
               return`<tr id="brow-${i}-${j}" class="${t.included?'':'excluded'}" style="border-top:1px solid var(--border)">
-                <td style="padding:5px 8px"><button class="row-tog" onclick="bTogRow(${i},${j})">${t.included?'✕':'+'}</button></td>
+                <td style="padding:5px 8px"><button class="row-tog" onclick="bTogRow(${i},${j})">${t.included?'â':'+'}</button></td>
                 <td class="td-date" style="padding:5px 8px">${t.date}</td>
                 <td style="padding:5px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">${(t.description_clean||'').slice(0,35)}</td>
                 <td class="td-amt ${Number(t.amount)<0?'neg':'pos'}" style="padding:5px 8px">${Number(t.amount)<0?'':'+'}$${Math.abs(Number(t.amount)).toLocaleString('es-CL')}</td>
@@ -981,7 +981,7 @@ function bRenderPreviewAll(){
       </div>
     </div>`).join('');
 }
-function bTogAcc(i){const body=document.getElementById('bacc-body-'+i);const arr=document.getElementById('bacc-arr-'+i);const open=body.style.display==='block';body.style.display=open?'none':'block';arr.textContent=open?'▼':'▲';}
+function bTogAcc(i){const body=document.getElementById('bacc-body-'+i);const arr=document.getElementById('bacc-arr-'+i);const open=body.style.display==='block';body.style.display=open?'none':'block';arr.textContent=open?'â¼':'â²';}
 function bTogRow(fi,ti){bFiles[fi].txs[ti].included=!bFiles[fi].txs[ti].included;bRenderPreviewAll();}
 
 async function bConfirmAll(){
@@ -993,16 +993,31 @@ async function bConfirmAll(){
       const{inserted,skipped}=await insertToSupabase(toIns,b.meta);
       totalIns+=inserted;totalSkip+=skipped;totalFiles++;
     }
-    document.getElementById('b-success-sub').textContent=`${totalIns} transacciones nuevas de ${totalFiles} archivos · ${totalSkip} duplicadas omitidas`;
+    document.getElementById('b-success-sub').textContent=`${totalIns} transacciones nuevas de ${totalFiles} archivos Â· ${totalSkip} duplicadas omitidas`;
     document.getElementById('b-success-grid').innerHTML=`<div class="s-card"><div class="s-label">Archivos</div><div class="s-val">${totalFiles}</div></div><div class="s-card"><div class="s-label">Insertadas</div><div class="s-val">${totalIns}</div></div><div class="s-card"><div class="s-label">Omitidas</div><div class="s-val">${totalSkip}</div></div>`;
     bGoPanel(5);renderSteps(5);
-  }catch(e){toast('Error: '+e.message,true);btn.disabled=false;btn.textContent='Importar todo →';}
+  }catch(e){toast('Error: '+e.message,true);btn.disabled=false;btn.textContent='Importar todo â';}
 }
 function resetBulk(){bFiles=[];bRenderQueue();document.getElementById('b-file-input').value='';document.getElementById('b-btn-1').disabled=true;bGoPanel(1);renderSteps(1);}
 
-// ── INIT ──
+// ââ INIT ââ
 setMode('single');renderSteps(1);renderDriveStatus('s-drive-section');
 if(localStorage.getItem('goog_client_id'))connectDrive('s-drive-section');
+
+// ── UX PATCH: Skip account step for boletas & liquidaciones ──
+(function() {
+  var _orig = window.sGoStep;
+  window.sGoStep = function(n) {
+    if (n === 2 && (currentDocType === 'boleta' || currentDocType === 'liqui')) {
+      sAccount = { id: null, bank: '', name: 'boleta', currency: 'CLP', is_virtual: true };
+      sGoPanel(3); rSteps(3); sProc();
+      return;
+    }
+    if (_orig) _orig(n);
+  };
+  console.log('UX patch loaded ✅');
+})();
+// ── END UX PATCH ──
 </script>
 </body>
 </html>
