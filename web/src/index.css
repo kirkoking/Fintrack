@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens — dark mode (default) ── */
+:root {
+  --bg:        #0e0f11;
+  --surface:   #16181c;
+  --surface2:  #1e2126;
+  --surface3:  #252830;
+  --border:    #2a2d35;
+  --border2:   #383d48;
+  --text:      #f0ede8;
+  --text2:     #a8aab8;
+  --text3:     #5a5e6e;
+  --accent:    #c8f060;
+  --accent-dim:rgba(200,240,96,0.12);
+  --accent2:   #60c8f0;
+  --accent3:   #f060a8;
+  --danger:    #f06060;
+  --warning:   #f0b060;
+  --success:   #60f0a8;
+  --shadow:    0 4px 24px rgba(0,0,0,0.4);
+
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Light mode overrides ── */
+.light {
+  --bg:        #f4f4f0;
+  --surface:   #ffffff;
+  --surface2:  #f0ede8;
+  --surface3:  #e8e4de;
+  --border:    #dcd8d0;
+  --border2:   #c8c4bc;
+  --text:      #1a1a18;
+  --text2:     #5a5a54;
+  --text3:     #9a9a94;
+  --accent:    #4a7a00;
+  --accent-dim:rgba(74,122,0,0.1);
+  --accent2:   #0070a8;
+  --accent3:   #a80070;
+  --danger:    #c00000;
+  --warning:   #a06000;
+  --success:   #006040;
+  --shadow:    0 4px 24px rgba(0,0,0,0.1);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+a { color: var(--accent); text-decoration: none; }
+
+/* ── Utility classes ── */
+.font-serif { font-family: 'DM Serif Display', Georgia, serif; }
+.font-mono  { font-family: 'DM Mono', monospace; }
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
