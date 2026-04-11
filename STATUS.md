@@ -1,9 +1,65 @@
 # Fintrack — STATUS
 
+## Sesión 2026-04-11 (continuación)
+
+**Wave:** C completa (React dashboard)
+**Estado:** ✅ DONE — Wave C completa. App corriendo en `web/`. Listo para revisión antes de Wave D.
+
+Para ver localmente:
+```bash
+cd web && npm install && npm run dev
+# Abre http://localhost:5173
+```
+
+---
+
+## Wave C — React dashboard (`7196384`)
+
+### Lo que se construyó
+
+**Stack:** Vite 5 + React 18 + TypeScript + Tailwind 3.4 + TanStack Query + Framer Motion
+
+**Carpeta:** `web/` en el repo
+
+**Verificado en browser:** todas las tabs, drilldown modal, animaciones, datos reales de Supabase
+
+### Componentes
+
+| Componente | Descripción |
+|---|---|
+| `lib/supabase.ts` | Cliente tipado, tipos, helpers `clp()`, constantes de categorías |
+| `hooks/useFintrack.ts` | TanStack Query hooks para todas las vistas Wave A |
+| `InsightCard` | Swipe-to-dismiss (Framer Motion), severity color-coded, "Ver detalle" |
+| `InsightFeed` | Grid 2 cols, skeleton loading, AnimatePresence |
+| `CashflowBadge` | Flujo neto + daily burn rate |
+| `CategoryComparison` | Este mes vs baseline, delta %, esenciales marcados como tal |
+| `MerchantTrend` | Top merchants con cambio >20% vs histórico |
+| `SubscriptionList` | Secciones Esenciales / Opcionales — **nunca sugiere cortar esenciales** |
+| `TransactionTable` | Paginado 50/pág, filtros múltiples, edición inline de categoría |
+| `DrilldownModal` | Bottom sheet spring animation, tx por merchant |
+
+### Vistas / Tabs
+
+| Tab | Contenido |
+|---|---|
+| 🧠 Inicio | CashflowBadge + InsightFeed + CategoryComparison + MerchantTrend |
+| 📋 Movimientos | TransactionTable con todos los filtros |
+| 🔄 Suscripciones | SubscriptionList con total anual |
+| 💳 Créditos | Progress bars, cuotas, saldo, tasa, término |
+
+### Pendiente / notas
+
+- **Wave C.5 (bundle único):** El output actual es `dist/` (Vite). Para producción como `.html` único se puede usar `vite-plugin-singlefile`. No implementado aún.
+- **Income data:** La tabla `income` sigue vacía → CashflowBadge muestra $0 ingresado. Wave F lo resuelve.
+- **Interest rates en Créditos:** Valores en DB parecen en formato decimal bajo (0.02% en pantalla). Es dato, no bug de código.
+- **Wave D (parser cascade Gemini):** NO iniciar sin aprobación de Kirk.
+
+---
+
 ## Sesión 2026-04-11
 
 **Wave:** B completa (B.1 → B.5)
-**Estado:** ✅ DONE — Wave B completa, listo para revisión antes de Wave C
+**Estado:** ✅ DONE
 
 ---
 
